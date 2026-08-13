@@ -1,1 +1,1536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0,
+      maximum-scale=1.0, user-scalable=no">
 
+<title>Noventra Scan</title>
+
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+<style>
+:root{
+  --bg:#070b12;
+  --card:#101722;
+  --card2:#151e2b;
+  --border:#202b3a;
+  --text:#f4f7fb;
+  --muted:#8290a3;
+  --blue:#3da9ff;
+  --green:#20d69b;
+  --yellow:#ffc857;
+  --red:#ff5d6c;
+  --purple:#8c6cff;
+}
+
+*{
+  box-sizing:border-box;
+  -webkit-tap-highlight-color:transparent;
+}
+
+html,body{
+  margin:0;
+  padding:0;
+  width:100%;
+  min-height:100%;
+  background:var(--bg);
+  color:var(--text);
+  font-family:
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    Arial,
+    sans-serif;
+}
+
+body{
+  overflow-x:hidden;
+}
+
+.app{
+  width:100%;
+  max-width:680px;
+  margin:auto;
+  padding:18px 16px 35px;
+}
+
+/* HEADER */
+
+.header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:24px;
+}
+
+.brand{
+  display:flex;
+  align-items:center;
+  gap:11px;
+}
+
+.logo{
+  width:42px;
+  height:42px;
+  border-radius:50%;
+  object-fit:cover;
+  border:1px solid #394454;
+  background:#0b1018;
+}
+
+.brand-title{
+  font-size:19px;
+  font-weight:800;
+  letter-spacing:-.3px;
+}
+
+.brand-sub{
+  font-size:11px;
+  color:var(--muted);
+  margin-top:2px;
+}
+
+.network{
+  padding:7px 10px;
+  border-radius:20px;
+  background:#0c1925;
+  color:var(--blue);
+  border:1px solid #17354b;
+  font-size:11px;
+  font-weight:700;
+}
+
+/* HERO */
+
+.hero{
+  margin-bottom:22px;
+}
+
+.hero h1{
+  margin:0;
+  font-size:30px;
+  line-height:1.1;
+  letter-spacing:-1px;
+}
+
+.hero p{
+  margin:10px 0 0;
+  color:var(--muted);
+  font-size:14px;
+  line-height:1.55;
+}
+
+/* SEARCH */
+
+.search-card{
+  background:linear-gradient(
+    145deg,
+    #111a26,
+    #0d141e
+  );
+  border:1px solid var(--border);
+  border-radius:18px;
+  padding:15px;
+  box-shadow:0 10px 35px rgba(0,0,0,.2);
+}
+
+.search-label{
+  font-size:11px;
+  color:var(--muted);
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:.8px;
+  margin-bottom:9px;
+}
+
+.search-row{
+  display:flex;
+  gap:9px;
+}
+
+input{
+  flex:1;
+  min-width:0;
+  height:50px;
+  border:1px solid #283546;
+  border-radius:13px;
+  background:#080e16;
+  color:white;
+  padding:0 14px;
+  outline:none;
+  font-size:13px;
+}
+
+input:focus{
+  border-color:var(--blue);
+  box-shadow:0 0 0 3px rgba(61,169,255,.09);
+}
+
+.scan-btn{
+  width:105px;
+  border:0;
+  border-radius:13px;
+  background:var(--blue);
+  color:#04101a;
+  font-weight:800;
+  font-size:13px;
+  cursor:pointer;
+}
+
+.scan-btn:active{
+  transform:scale(.97);
+}
+
+.example{
+  margin-top:10px;
+  color:#657386;
+  font-size:10px;
+  line-height:1.4;
+}
+
+/* LOADING */
+
+.loading{
+  display:none;
+  margin-top:18px;
+  text-align:center;
+  color:var(--muted);
+  font-size:13px;
+}
+
+.spinner{
+  width:28px;
+  height:28px;
+  margin:0 auto 9px;
+  border-radius:50%;
+  border:3px solid #263342;
+  border-top-color:var(--blue);
+  animation:spin .8s linear infinite;
+}
+
+@keyframes spin{
+  to{transform:rotate(360deg);}
+}
+
+/* ERROR */
+
+.error{
+  display:none;
+  margin-top:16px;
+  padding:13px;
+  border-radius:13px;
+  border:1px solid rgba(255,93,108,.25);
+  background:rgba(255,93,108,.07);
+  color:#ff8792;
+  font-size:12px;
+  line-height:1.5;
+}
+
+/* RESULT */
+
+.result{
+  display:none;
+  margin-top:18px;
+}
+
+/* TOKEN */
+
+.token-card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:19px;
+  padding:17px;
+}
+
+.token-top{
+  display:flex;
+  align-items:center;
+  gap:13px;
+}
+
+.token-image{
+  width:57px;
+  height:57px;
+  border-radius:16px;
+  object-fit:cover;
+  background:#0a1018;
+  border:1px solid #2b3746;
+}
+
+.token-name{
+  font-size:20px;
+  font-weight:800;
+}
+
+.token-symbol{
+  color:var(--blue);
+  font-size:12px;
+  font-weight:700;
+  margin-top:3px;
+}
+
+.verify{
+  margin-left:auto;
+  font-size:10px;
+  padding:6px 8px;
+  border-radius:8px;
+  font-weight:800;
+}
+
+.verify.good{
+  background:rgba(32,214,155,.1);
+  color:var(--green);
+  border:1px solid rgba(32,214,155,.2);
+}
+
+.verify.warn{
+  background:rgba(255,200,87,.1);
+  color:var(--yellow);
+  border:1px solid rgba(255,200,87,.2);
+}
+
+.verify.bad{
+  background:rgba(255,93,108,.1);
+  color:var(--red);
+  border:1px solid rgba(255,93,108,.2);
+}
+
+.description{
+  margin-top:14px;
+  padding-top:14px;
+  border-top:1px solid var(--border);
+  color:var(--muted);
+  font-size:12px;
+  line-height:1.55;
+}
+
+/* SCORE */
+
+.score-card{
+  margin-top:12px;
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:19px;
+  padding:17px;
+}
+
+.score-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.score-title{
+  font-size:13px;
+  font-weight:800;
+}
+
+.score-value{
+  font-size:25px;
+  font-weight:900;
+}
+
+.score-bar{
+  height:8px;
+  margin-top:13px;
+  background:#202a37;
+  border-radius:10px;
+  overflow:hidden;
+}
+
+.score-fill{
+  height:100%;
+  width:0;
+  border-radius:10px;
+  transition:width .7s ease;
+}
+
+.score-label{
+  margin-top:9px;
+  color:var(--muted);
+  font-size:11px;
+}
+
+/* STATS */
+
+.stats{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:10px;
+  margin-top:12px;
+}
+
+.stat{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:15px;
+}
+
+.stat-label{
+  color:var(--muted);
+  font-size:10px;
+  text-transform:uppercase;
+  letter-spacing:.6px;
+}
+
+.stat-value{
+  margin-top:7px;
+  font-size:17px;
+  font-weight:800;
+  word-break:break-word;
+}
+
+/* SECURITY */
+
+.security{
+  margin-top:12px;
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:19px;
+  padding:17px;
+}
+
+.section-title{
+  font-size:14px;
+  font-weight:800;
+  margin-bottom:13px;
+}
+
+.check{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:10px 0;
+  border-bottom:1px solid #1b2531;
+}
+
+.check:last-child{
+  border-bottom:0;
+}
+
+.check-icon{
+  width:26px;
+  height:26px;
+  border-radius:8px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:12px;
+  font-weight:900;
+  background:#182331;
+}
+
+.check-text{
+  flex:1;
+}
+
+.check-name{
+  font-size:12px;
+  font-weight:700;
+}
+
+.check-status{
+  margin-top:2px;
+  color:var(--muted);
+  font-size:10px;
+}
+
+/* ACTIONS */
+
+.actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  margin-top:12px;
+}
+
+.action{
+  height:48px;
+  border-radius:13px;
+  border:1px solid var(--border);
+  background:#111925;
+  color:#dbe5ef;
+  font-weight:700;
+  font-size:12px;
+  cursor:pointer;
+}
+
+.action:active{
+  transform:scale(.98);
+}
+
+.action.primary{
+  background:#13263a;
+  border-color:#1e4b70;
+  color:var(--blue);
+}
+
+/* ADDRESS */
+
+.address-box{
+  margin-top:12px;
+  background:#0b1119;
+  border:1px solid var(--border);
+  border-radius:15px;
+  padding:13px;
+}
+
+.address-title{
+  color:var(--muted);
+  font-size:10px;
+  margin-bottom:7px;
+}
+
+.address{
+  font-family:monospace;
+  font-size:10px;
+  color:#a9b7c8;
+  word-break:break-all;
+  line-height:1.5;
+}
+
+/* FOOTER */
+
+.footer{
+  margin-top:22px;
+  text-align:center;
+  color:#4d5b6c;
+  font-size:10px;
+  line-height:1.6;
+}
+
+.footer strong{
+  color:#657386;
+}
+
+/* MOBILE */
+
+@media(max-width:390px){
+  .hero h1{
+    font-size:27px;
+  }
+
+  .scan-btn{
+    width:92px;
+  }
+
+  .stats{
+    grid-template-columns:1fr 1fr;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+  <header class="header">
+    <div class="brand">
+      <img
+        class="logo"
+        src="https://raw.githubusercontent.com/aytekinm099-pixel/Noventra-Signal/main/logo.png"
+        onerror="this.style.display='none'"
+        alt="Noventra">
+      <div>
+        <div class="brand-title">Noventra Scan</div>
+        <div class="brand-sub">TON Token Intelligence</div>
+      </div>
+    </div>
+
+    <div class="network">
+      TON MAINNET
+    </div>
+  </header>
+
+
+  <section class="hero">
+    <h1>Analyze before you enter.</h1>
+    <p>
+      Scan a TON Jetton and instantly inspect
+      its identity, supply, holders, verification
+      and basic contract risk signals.
+    </p>
+  </section>
+
+
+  <section class="search-card">
+
+    <div class="search-label">
+      Jetton Master Address
+    </div>
+
+    <div class="search-row">
+
+      <input
+        id="addressInput"
+        type="text"
+        autocomplete="off"
+        autocorrect="off"
+        spellcheck="false"
+        placeholder="EQ... / UQ...">
+
+      <button
+        class="scan-btn"
+        onclick="scanToken()">
+        SCAN
+      </button>
+
+    </div>
+
+    <div class="example">
+      Enter the Jetton master contract address.
+      Noventra does not ask for your seed phrase or private key.
+    </div>
+
+  </section>
+
+
+  <div class="loading" id="loading">
+    <div class="spinner"></div>
+    Reading TON blockchain data...
+  </div>
+
+
+  <div class="error" id="error"></div>
+
+
+  <main class="result" id="result">
+
+    <section class="token-card">
+
+      <div class="token-top">
+
+        <img
+          id="tokenImage"
+          class="token-image"
+          src=""
+          alt="Token">
+
+        <div>
+          <div id="tokenName" class="token-name">
+            —
+          </div>
+
+          <div id="tokenSymbol" class="token-symbol">
+            —
+          </div>
+        </div>
+
+        <div
+          id="verification"
+          class="verify">
+          —
+        </div>
+
+      </div>
+
+      <div
+        id="description"
+        class="description">
+      </div>
+
+    </section>
+
+
+    <section class="score-card">
+
+      <div class="score-head">
+
+        <div class="score-title">
+          Noventra Risk Score
+        </div>
+
+        <div
+          id="scoreValue"
+          class="score-value">
+          —
+        </div>
+
+      </div>
+
+      <div class="score-bar">
+        <div
+          id="scoreFill"
+          class="score-fill">
+        </div>
+      </div>
+
+      <div
+        id="scoreLabel"
+        class="score-label">
+        Analyzing token signals...
+      </div>
+
+    </section>
+
+
+    <section class="stats">
+
+      <div class="stat">
+        <div class="stat-label">
+          Holders
+        </div>
+
+        <div
+          id="holders"
+          class="stat-value">
+          —
+        </div>
+      </div>
+
+
+      <div class="stat">
+        <div class="stat-label">
+          Total Supply
+        </div>
+
+        <div
+          id="supply"
+          class="stat-value">
+          —
+        </div>
+      </div>
+
+
+      <div class="stat">
+        <div class="stat-label">
+          Decimals
+        </div>
+
+        <div
+          id="decimals"
+          class="stat-value">
+          —
+        </div>
+      </div>
+
+
+      <div class="stat">
+        <div class="stat-label">
+          Mintable
+        </div>
+
+        <div
+          id="mintable"
+          class="stat-value">
+          —
+        </div>
+      </div>
+
+    </section>
+
+
+    <section class="security">
+
+      <div class="section-title">
+        Security Signals
+      </div>
+
+
+      <div class="check">
+
+        <div
+          id="verifyIcon"
+          class="check-icon">
+          ?
+        </div>
+
+        <div class="check-text">
+
+          <div class="check-name">
+            Token Verification
+          </div>
+
+          <div
+            id="verifyStatus"
+            class="check-status">
+            —
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <div class="check">
+
+        <div
+          id="mintIcon"
+          class="check-icon">
+          ?
+        </div>
+
+        <div class="check-text">
+
+          <div class="check-name">
+            Mint Authority
+          </div>
+
+          <div
+            id="mintStatus"
+            class="check-status">
+            —
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <div class="check">
+
+        <div
+          id="holderIcon"
+          class="check-icon">
+          ?
+        </div>
+
+        <div class="check-text">
+
+          <div class="check-name">
+            Holder Distribution
+          </div>
+
+          <div
+            id="holderStatus"
+            class="check-status">
+            —
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <div class="check">
+
+        <div
+          id="adminIcon"
+          class="check-icon">
+          ?
+        </div>
+
+        <div class="check-text">
+
+          <div class="check-name">
+            Admin Contract
+          </div>
+
+          <div
+            id="adminStatus"
+            class="check-status">
+            —
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <section class="actions">
+
+      <button
+        class="action primary"
+        onclick="openExplorer()">
+        TON EXPLORER
+      </button>
+
+      <button
+        class="action"
+        onclick="copyAddress()">
+        COPY ADDRESS
+      </button>
+
+    </section>
+
+
+    <section class="address-box">
+
+      <div class="address-title">
+        JETTON MASTER ADDRESS
+      </div>
+
+      <div
+        id="addressDisplay"
+        class="address">
+        —
+      </div>
+
+    </section>
+
+  </main>
+
+
+  <footer class="footer">
+    <strong>Noventra Scan</strong><br>
+    On-chain intelligence for TON.
+  </footer>
+
+</div>
+
+
+<script>
+
+const tg = window.Telegram?.WebApp;
+
+if(tg){
+  tg.ready();
+  tg.expand();
+
+  if(tg.setHeaderColor){
+    tg.setHeaderColor("#070b12");
+  }
+
+  if(tg.setBackgroundColor){
+    tg.setBackgroundColor("#070b12");
+  }
+}
+
+
+/*
+  Noventra Scan
+  Data provider: TONAPI
+
+  TONAPI currently allows unauthenticated requests
+  with strict rate limits. For production, put your
+  TONAPI key behind your own backend/Cloudflare Worker.
+*/
+
+const API_BASE = "https://tonapi.io/v2";
+
+
+let currentAddress = "";
+
+
+function $(id){
+  return document.getElementById(id);
+}
+
+
+function showLoading(state){
+
+  $("loading").style.display =
+    state ? "block" : "none";
+
+}
+
+
+function showError(message){
+
+  $("error").textContent = message;
+  $("error").style.display = "block";
+
+}
+
+
+function clearError(){
+
+  $("error").textContent = "";
+  $("error").style.display = "none";
+
+}
+
+
+function formatNumber(value){
+
+  if(value === null || value === undefined){
+    return "—";
+  }
+
+  const num = Number(value);
+
+  if(!Number.isFinite(num)){
+    return String(value);
+  }
+
+  return new Intl.NumberFormat("en-US", {
+    maximumFractionDigits: 2
+  }).format(num);
+
+}
+
+
+function formatSupply(raw, decimals){
+
+  if(raw === null || raw === undefined){
+    return "—";
+  }
+
+  try{
+
+    const value = BigInt(raw);
+
+    const d = Number(decimals || 0);
+
+    if(d === 0){
+      return value.toLocaleString("en-US");
+    }
+
+    const divisor = 10n ** BigInt(d);
+
+    const whole = value / divisor;
+
+    const fraction =
+      (value % divisor)
+      .toString()
+      .padStart(d, "0")
+      .replace(/0+$/,"");
+
+    const result =
+      fraction.length
+        ? `${whole}.${fraction}`
+        : `${whole}`;
+
+    const numberValue = Number(result);
+
+    if(Number.isFinite(numberValue)){
+      return new Intl.NumberFormat("en-US", {
+        maximumFractionDigits: 2
+      }).format(numberValue);
+    }
+
+    return result;
+
+  }catch(e){
+
+    return String(raw);
+
+  }
+
+}
+
+
+function shortAddress(address){
+
+  if(!address){
+    return "—";
+  }
+
+  if(address.length <= 18){
+    return address;
+  }
+
+  return address.slice(0,9) +
+    "..." +
+    address.slice(-7);
+
+}
+
+
+function verificationClass(value){
+
+  const v = String(value || "").toLowerCase();
+
+  if(
+    v === "whitelist" ||
+    v === "verified"
+  ){
+    return "good";
+  }
+
+  if(
+    v === "blacklist" ||
+    v === "scam"
+  ){
+    return "bad";
+  }
+
+  return "warn";
+
+}
+
+
+function verificationText(value){
+
+  const v = String(value || "").toLowerCase();
+
+  if(v === "whitelist"){
+    return "VERIFIED";
+  }
+
+  if(v === "blacklist"){
+    return "BLACKLISTED";
+  }
+
+  return "UNKNOWN";
+
+}
+
+
+function calculateRisk(data){
+
+  let risk = 100;
+
+  const verification =
+    String(data.verification || "").toLowerCase();
+
+  if(verification === "whitelist"){
+    risk += 0;
+  }
+
+  if(verification === "blacklist"){
+    risk -= 60;
+  }
+
+  if(data.mintable === true){
+    risk -= 15;
+  }
+
+  const holders =
+    Number(data.holders_count || 0);
+
+  if(holders < 10){
+    risk -= 20;
+  }else if(holders < 50){
+    risk -= 10;
+  }else if(holders < 200){
+    risk -= 5;
+  }
+
+  if(!data.metadata?.name){
+    risk -= 5;
+  }
+
+  if(!data.metadata?.symbol){
+    risk -= 5;
+  }
+
+  risk = Math.max(
+    0,
+    Math.min(100,risk)
+  );
+
+  return risk;
+
+}
+
+
+function scoreLabel(score){
+
+  if(score >= 85){
+    return "LOW RISK SIGNAL";
+  }
+
+  if(score >= 65){
+    return "MODERATE RISK SIGNAL";
+  }
+
+  if(score >= 40){
+    return "HIGH RISK SIGNAL";
+  }
+
+  return "VERY HIGH RISK SIGNAL";
+
+}
+
+
+function scoreColor(score){
+
+  if(score >= 85){
+    return "var(--green)";
+  }
+
+  if(score >= 65){
+    return "var(--yellow)";
+  }
+
+  return "var(--red)";
+
+}
+
+
+function setCheck(
+  iconId,
+  statusId,
+  good,
+  title
+){
+
+  $(iconId).textContent =
+    good ? "✓" : "!";
+
+  $(iconId).style.color =
+    good
+      ? "var(--green)"
+      : "var(--yellow)";
+
+  $(statusId).textContent =
+    title;
+
+}
+
+
+async function scanToken(){
+
+  clearError();
+
+  const input =
+    $("addressInput").value.trim();
+
+  if(!input){
+
+    showError(
+      "Please enter a TON Jetton master address."
+    );
+
+    return;
+  }
+
+  /*
+    Basic TON address validation.
+    Supports bounceable/non-bounceable friendly
+    addresses beginning with EQ/UQ or raw addresses.
+  */
+
+  const valid =
+    /^(EQ|UQ)[A-Za-z0-9_-]{46}$/.test(input) ||
+    /^-?\d+:[a-fA-F0-9]{64}$/.test(input);
+
+  if(!valid){
+
+    showError(
+      "Invalid TON address format. Use a Jetton master address beginning with EQ or UQ."
+    );
+
+    return;
+  }
+
+  currentAddress = input;
+
+  $("result").style.display = "none";
+
+  showLoading(true);
+
+  try{
+
+    const response =
+      await fetch(
+        API_BASE +
+        "/jettons/" +
+        encodeURIComponent(input)
+      );
+
+    if(!response.ok){
+
+      if(response.status === 404){
+        throw new Error(
+          "Jetton not found. Check that you entered the Jetton master contract address."
+        );
+      }
+
+      if(response.status === 429){
+        throw new Error(
+          "TONAPI rate limit reached. Please wait a few seconds and try again."
+        );
+      }
+
+      throw new Error(
+        "TONAPI request failed (" +
+        response.status +
+        ")."
+      );
+
+    }
+
+    const data =
+      await response.json();
+
+    renderToken(data);
+
+  }catch(error){
+
+    console.error(error);
+
+    showError(
+      error.message ||
+      "Unable to scan this token."
+    );
+
+  }finally{
+
+    showLoading(false);
+
+  }
+
+}
+
+
+function renderToken(data){
+
+  const metadata =
+    data.metadata || {};
+
+  const name =
+    metadata.name ||
+    "Unknown Token";
+
+  const symbol =
+    metadata.symbol ||
+    "UNKNOWN";
+
+  const decimals =
+    metadata.decimals ?? 0;
+
+  const verification =
+    data.verification || "unknown";
+
+  $("tokenName").textContent =
+    name;
+
+  $("tokenSymbol").textContent =
+    symbol;
+
+  $("tokenImage").src =
+    data.preview ||
+    metadata.image ||
+    "";
+
+  $("tokenImage").onerror =
+    function(){
+      this.style.visibility = "hidden";
+    };
+
+
+  const verificationElement =
+    $("verification");
+
+  verificationElement.textContent =
+    verificationText(verification);
+
+  verificationElement.className =
+    "verify " +
+    verificationClass(verification);
+
+
+  $("description").textContent =
+    metadata.description ||
+    "No token description available.";
+
+
+  $("holders").textContent =
+    formatNumber(data.holders_count);
+
+
+  $("supply").textContent =
+    formatSupply(
+      data.total_supply,
+      decimals
+    );
+
+
+  $("decimals").textContent =
+    decimals;
+
+
+  $("mintable").textContent =
+    data.mintable
+      ? "YES"
+      : "NO";
+
+
+  $("addressDisplay").textContent =
+    currentAddress;
+
+
+  /*
+    Risk score
+  */
+
+  const score =
+    calculateRisk(data);
+
+  $("scoreValue").textContent =
+    score + "/100";
+
+  $("scoreFill").style.width =
+    score + "%";
+
+  $("scoreFill").style.background =
+    scoreColor(score);
+
+  $("scoreValue").style.color =
+    scoreColor(score);
+
+  $("scoreLabel").textContent =
+    scoreLabel(score);
+
+
+  /*
+    Verification
+  */
+
+  setCheck(
+    "verifyIcon",
+    "verifyStatus",
+    String(verification).toLowerCase() === "whitelist",
+    verificationText(verification)
+  );
+
+
+  /*
+    Minting
+  */
+
+  setCheck(
+    "mintIcon",
+    "mintStatus",
+    data.mintable !== true,
+    data.mintable
+      ? "Mintable — additional supply may be possible."
+      : "Not currently marked as mintable."
+  );
+
+
+  /*
+    Holder count
+  */
+
+  const holderCount =
+    Number(data.holders_count || 0);
+
+  setCheck(
+    "holderIcon",
+    "holderStatus",
+    holderCount >= 100,
+    holderCount >= 100
+      ? "Holder count exceeds 100."
+      : "Low holder count — use caution."
+  );
+
+
+  /*
+    Admin
+  */
+
+  const hasAdmin =
+    !!data.admin?.address ||
+    !!data.admin;
+
+  setCheck(
+    "adminIcon",
+    "adminStatus",
+    !hasAdmin,
+    hasAdmin
+      ? "Admin address detected."
+      : "No admin address reported."
+  );
+
+
+  $("result").style.display =
+    "block";
+
+}
+
+
+function openExplorer(){
+
+  if(!currentAddress){
+    return;
+  }
+
+  const url =
+    "https://tonviewer.com/" +
+    encodeURIComponent(currentAddress);
+
+  if(tg?.openLink){
+    tg.openLink(url);
+  }else{
+    window.open(url,"_blank");
+  }
+
+}
+
+
+async function copyAddress(){
+
+  if(!currentAddress){
+    return;
+  }
+
+  try{
+
+    await navigator.clipboard.writeText(
+      currentAddress
+    );
+
+    if(tg?.showPopup){
+
+      tg.showPopup({
+        title:"Copied",
+        message:"Jetton address copied.",
+        buttons:[
+          {type:"ok"}
+        ]
+      });
+
+    }else{
+
+      alert("Address copied.");
+
+    }
+
+  }catch(e){
+
+    alert(
+      "Copy failed. Please copy the address manually."
+    );
+
+  }
+
+}
+
+
+/*
+  Enter key
+*/
+
+$("addressInput")
+  .addEventListener(
+    "keydown",
+    function(event){
+
+      if(event.key === "Enter"){
+        scanToken();
+      }
+
+    }
+  );
+
+
+/*
+  Telegram Back Button
+*/
+
+if(tg?.BackButton){
+
+  tg.BackButton.show();
+
+  tg.BackButton.onClick(
+    function(){
+
+      if($("result").style.display === "block"){
+
+        $("result").style.display = "none";
+
+      }else{
+
+        tg.close();
+
+      }
+
+    }
+  );
+
+}
+
+</script>
+
+</body>
+  </html>
