@@ -2,1535 +2,357 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport"
-      content="width=device-width, initial-scale=1.0,
-      maximum-scale=1.0, user-scalable=no">
-
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#070b12">
 <title>Noventra Scan</title>
-
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
-
 <style>
 :root{
-  --bg:#070b12;
-  --card:#101722;
-  --card2:#151e2b;
-  --border:#202b3a;
-  --text:#f4f7fb;
-  --muted:#8290a3;
-  --blue:#3da9ff;
-  --green:#20d69b;
-  --yellow:#ffc857;
-  --red:#ff5d6c;
-  --purple:#8c6cff;
-}
-
-*{
-  box-sizing:border-box;
-  -webkit-tap-highlight-color:transparent;
-}
-
-html,body{
-  margin:0;
-  padding:0;
-  width:100%;
-  min-height:100%;
-  background:var(--bg);
-  color:var(--text);
-  font-family:
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    Roboto,
-    Arial,
-    sans-serif;
-}
-
-body{
-  overflow-x:hidden;
-}
-
-.app{
-  width:100%;
-  max-width:680px;
-  margin:auto;
-  padding:18px 16px 35px;
-}
-
-/* HEADER */
-
-.header{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  margin-bottom:24px;
-}
-
-.brand{
-  display:flex;
-  align-items:center;
-  gap:11px;
-}
-
-.logo{
-  width:42px;
-  height:42px;
-  border-radius:50%;
-  object-fit:cover;
-  border:1px solid #394454;
-  background:#0b1018;
-}
-
-.brand-title{
-  font-size:19px;
-  font-weight:800;
-  letter-spacing:-.3px;
-}
-
-.brand-sub{
-  font-size:11px;
-  color:var(--muted);
-  margin-top:2px;
-}
-
-.network{
-  padding:7px 10px;
-  border-radius:20px;
-  background:#0c1925;
-  color:var(--blue);
-  border:1px solid #17354b;
-  font-size:11px;
-  font-weight:700;
-}
-
-/* HERO */
-
-.hero{
-  margin-bottom:22px;
-}
-
-.hero h1{
-  margin:0;
-  font-size:30px;
-  line-height:1.1;
-  letter-spacing:-1px;
-}
-
-.hero p{
-  margin:10px 0 0;
-  color:var(--muted);
-  font-size:14px;
-  line-height:1.55;
-}
-
-/* SEARCH */
-
-.search-card{
-  background:linear-gradient(
-    145deg,
-    #111a26,
-    #0d141e
-  );
-  border:1px solid var(--border);
-  border-radius:18px;
-  padding:15px;
-  box-shadow:0 10px 35px rgba(0,0,0,.2);
-}
-
-.search-label{
-  font-size:11px;
-  color:var(--muted);
-  font-weight:700;
-  text-transform:uppercase;
-  letter-spacing:.8px;
-  margin-bottom:9px;
-}
-
-.search-row{
-  display:flex;
-  gap:9px;
-}
-
-input{
-  flex:1;
-  min-width:0;
-  height:50px;
-  border:1px solid #283546;
-  border-radius:13px;
-  background:#080e16;
-  color:white;
-  padding:0 14px;
-  outline:none;
-  font-size:13px;
-}
-
-input:focus{
-  border-color:var(--blue);
-  box-shadow:0 0 0 3px rgba(61,169,255,.09);
-}
-
-.scan-btn{
-  width:105px;
-  border:0;
-  border-radius:13px;
-  background:var(--blue);
-  color:#04101a;
-  font-weight:800;
-  font-size:13px;
-  cursor:pointer;
-}
-
-.scan-btn:active{
-  transform:scale(.97);
-}
-
-.example{
-  margin-top:10px;
-  color:#657386;
-  font-size:10px;
-  line-height:1.4;
-}
-
-/* LOADING */
-
-.loading{
-  display:none;
-  margin-top:18px;
-  text-align:center;
-  color:var(--muted);
-  font-size:13px;
-}
-
-.spinner{
-  width:28px;
-  height:28px;
-  margin:0 auto 9px;
-  border-radius:50%;
-  border:3px solid #263342;
-  border-top-color:var(--blue);
-  animation:spin .8s linear infinite;
-}
-
-@keyframes spin{
-  to{transform:rotate(360deg);}
-}
-
-/* ERROR */
-
-.error{
-  display:none;
-  margin-top:16px;
-  padding:13px;
-  border-radius:13px;
-  border:1px solid rgba(255,93,108,.25);
-  background:rgba(255,93,108,.07);
-  color:#ff8792;
-  font-size:12px;
-  line-height:1.5;
-}
-
-/* RESULT */
-
-.result{
-  display:none;
-  margin-top:18px;
-}
-
-/* TOKEN */
-
-.token-card{
-  background:var(--card);
-  border:1px solid var(--border);
-  border-radius:19px;
-  padding:17px;
-}
-
-.token-top{
-  display:flex;
-  align-items:center;
-  gap:13px;
-}
-
-.token-image{
-  width:57px;
-  height:57px;
-  border-radius:16px;
-  object-fit:cover;
-  background:#0a1018;
-  border:1px solid #2b3746;
-}
-
-.token-name{
-  font-size:20px;
-  font-weight:800;
-}
-
-.token-symbol{
-  color:var(--blue);
-  font-size:12px;
-  font-weight:700;
-  margin-top:3px;
-}
-
-.verify{
-  margin-left:auto;
-  font-size:10px;
-  padding:6px 8px;
-  border-radius:8px;
-  font-weight:800;
-}
-
-.verify.good{
-  background:rgba(32,214,155,.1);
-  color:var(--green);
-  border:1px solid rgba(32,214,155,.2);
-}
-
-.verify.warn{
-  background:rgba(255,200,87,.1);
-  color:var(--yellow);
-  border:1px solid rgba(255,200,87,.2);
-}
-
-.verify.bad{
-  background:rgba(255,93,108,.1);
-  color:var(--red);
-  border:1px solid rgba(255,93,108,.2);
-}
-
-.description{
-  margin-top:14px;
-  padding-top:14px;
-  border-top:1px solid var(--border);
-  color:var(--muted);
-  font-size:12px;
-  line-height:1.55;
-}
-
-/* SCORE */
-
-.score-card{
-  margin-top:12px;
-  background:var(--card);
-  border:1px solid var(--border);
-  border-radius:19px;
-  padding:17px;
-}
-
-.score-head{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-}
-
-.score-title{
-  font-size:13px;
-  font-weight:800;
-}
-
-.score-value{
-  font-size:25px;
-  font-weight:900;
-}
-
-.score-bar{
-  height:8px;
-  margin-top:13px;
-  background:#202a37;
-  border-radius:10px;
-  overflow:hidden;
-}
-
-.score-fill{
-  height:100%;
-  width:0;
-  border-radius:10px;
-  transition:width .7s ease;
-}
-
-.score-label{
-  margin-top:9px;
-  color:var(--muted);
-  font-size:11px;
-}
-
-/* STATS */
-
-.stats{
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:10px;
-  margin-top:12px;
-}
-
-.stat{
-  background:var(--card);
-  border:1px solid var(--border);
-  border-radius:16px;
-  padding:15px;
-}
-
-.stat-label{
-  color:var(--muted);
-  font-size:10px;
-  text-transform:uppercase;
-  letter-spacing:.6px;
-}
-
-.stat-value{
-  margin-top:7px;
-  font-size:17px;
-  font-weight:800;
-  word-break:break-word;
-}
-
-/* SECURITY */
-
-.security{
-  margin-top:12px;
-  background:var(--card);
-  border:1px solid var(--border);
-  border-radius:19px;
-  padding:17px;
-}
-
-.section-title{
-  font-size:14px;
-  font-weight:800;
-  margin-bottom:13px;
-}
-
-.check{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  padding:10px 0;
-  border-bottom:1px solid #1b2531;
-}
-
-.check:last-child{
-  border-bottom:0;
-}
-
-.check-icon{
-  width:26px;
-  height:26px;
-  border-radius:8px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:12px;
-  font-weight:900;
-  background:#182331;
-}
-
-.check-text{
-  flex:1;
-}
-
-.check-name{
-  font-size:12px;
-  font-weight:700;
-}
-
-.check-status{
-  margin-top:2px;
-  color:var(--muted);
-  font-size:10px;
-}
-
-/* ACTIONS */
-
-.actions{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:10px;
-  margin-top:12px;
-}
-
-.action{
-  height:48px;
-  border-radius:13px;
-  border:1px solid var(--border);
-  background:#111925;
-  color:#dbe5ef;
-  font-weight:700;
-  font-size:12px;
-  cursor:pointer;
-}
-
-.action:active{
-  transform:scale(.98);
-}
-
-.action.primary{
-  background:#13263a;
-  border-color:#1e4b70;
-  color:var(--blue);
-}
-
-/* ADDRESS */
-
-.address-box{
-  margin-top:12px;
-  background:#0b1119;
-  border:1px solid var(--border);
-  border-radius:15px;
-  padding:13px;
-}
-
-.address-title{
-  color:var(--muted);
-  font-size:10px;
-  margin-bottom:7px;
-}
-
-.address{
-  font-family:monospace;
-  font-size:10px;
-  color:#a9b7c8;
-  word-break:break-all;
-  line-height:1.5;
-}
-
-/* FOOTER */
-
-.footer{
-  margin-top:22px;
-  text-align:center;
-  color:#4d5b6c;
-  font-size:10px;
-  line-height:1.6;
-}
-
-.footer strong{
-  color:#657386;
-}
-
-/* MOBILE */
-
-@media(max-width:390px){
-  .hero h1{
-    font-size:27px;
-  }
-
-  .scan-btn{
-    width:92px;
-  }
-
-  .stats{
-    grid-template-columns:1fr 1fr;
-  }
-}
+  --bg:#070b12;--card:#101722;--card2:#151e2b;--border:#202b3a;
+  --text:#f4f7fb;--muted:#8290a3;--blue:#3da9ff;--green:#20d69b;
+  --yellow:#ffc857;--red:#ff5d6c;--purple:#8c6cff;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);
+font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif}
+body{overflow-x:hidden}.app{width:100%;max-width:680px;margin:auto;padding:14px 14px 90px}
+button,input{font:inherit}.header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.brand{display:flex;align-items:center;gap:10px}.logo{width:40px;height:40px;border-radius:50%;object-fit:cover;border:1px solid #394454;background:#0b1018}
+.brand-title{font-size:18px;font-weight:800}.brand-sub{font-size:11px;color:var(--muted);margin-top:1px}
+.header-right{display:flex;align-items:center;gap:7px}.network,.lang-btn{padding:7px 9px;border-radius:18px;background:#0c1925;color:var(--blue);border:1px solid #17354b;font-size:10px;font-weight:800}
+.lang-btn{cursor:pointer;background:#111925;border-color:var(--border);color:#c9d5e2}
+.lang-menu{display:none;position:absolute;right:14px;top:60px;z-index:20;background:#111925;border:1px solid var(--border);border-radius:13px;padding:5px;box-shadow:0 15px 40px #0008}
+.lang-menu button{display:block;width:100%;border:0;background:transparent;color:#cbd6e2;text-align:left;padding:9px 12px;border-radius:9px;font-size:12px;font-weight:700}
+.lang-menu button:hover{background:#1a2636}.nav{display:flex;gap:5px;margin-bottom:17px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:4px}
+.nav-btn{flex:1;height:36px;border:0;border-radius:10px;background:transparent;color:var(--muted);font-size:12px;font-weight:700;cursor:pointer}
+.nav-btn.active{background:#1a2636;color:var(--text)}
+.hero{margin-bottom:17px}.hero h1{margin:0;font-size:26px;line-height:1.15;letter-spacing:-.8px}.hero p{margin:8px 0 0;color:var(--muted);font-size:13px;line-height:1.5}
+.search-card{background:linear-gradient(145deg,#111a26,#0d141e);border:1px solid var(--border);border-radius:18px;padding:14px;box-shadow:0 10px 30px #0003}
+.search-label{font-size:10px;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:.7px;margin-bottom:8px}
+.search-row{display:flex;gap:8px}input{flex:1;min-width:0;height:48px;border:1px solid #283546;border-radius:12px;background:#080e16;color:#fff;padding:0 13px;outline:none;font-size:13px}
+input:focus{border-color:var(--blue);box-shadow:0 0 0 3px #3da9ff1a}input.invalid{border-color:var(--red)}
+.scan-btn{width:96px;border:0;border-radius:12px;background:var(--blue);color:#04101a;font-weight:900;font-size:12px;cursor:pointer}
+.scan-btn:active,.action:active{transform:scale(.98)}.example{margin-top:9px;color:#657386;font-size:10px;line-height:1.4}
+.loading{display:none;margin-top:15px}.skeleton{background:linear-gradient(90deg,#121a24 25%,#1a2430 50%,#121a24 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:12px}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}.skel-card{height:88px;margin-bottom:10px}.skel-score{height:106px;margin-bottom:10px}.skel-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.skel-stat{height:70px}
+.error{display:none;margin-top:14px;padding:12px;border-radius:12px;border:1px solid #ff5d6c40;background:#ff5d6c12;color:#ff8792;font-size:12px;line-height:1.5}
+.result{display:none;margin-top:15px}.token-card,.score-card,.security,.holders-card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:15px}
+.token-top{display:flex;align-items:center;gap:11px}.token-image,.token-fallback{width:54px;height:54px;border-radius:14px;flex-shrink:0}.token-image{object-fit:cover;background:#0a1018;border:1px solid #2b3746}.token-fallback{display:none;align-items:center;justify-content:center;font-weight:900;font-size:18px;background:linear-gradient(135deg,#3da9ff,#8c6cff);border:1px solid #2b3746}
+.token-info{min-width:0;flex:1}.token-name{font-size:18px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.token-symbol{color:var(--blue);font-size:12px;font-weight:800;margin-top:2px}.verify{font-size:9px;padding:5px 7px;border-radius:8px;font-weight:900;white-space:nowrap}.verify.good{background:#20d69b1a;color:var(--green);border:1px solid #20d69b33}.verify.warn{background:#ffc8571a;color:var(--yellow);border:1px solid #ffc85733}.verify.bad{background:#ff5d6c1a;color:var(--red);border:1px solid #ff5d6c33}
+.description{margin-top:12px;padding-top:12px;border-top:1px solid var(--border);color:var(--muted);font-size:12px;line-height:1.55}.desc-toggle{color:var(--blue);font-size:11px;font-weight:800;margin-top:6px;cursor:pointer;display:none}
+.ai-card{margin-top:10px;background:linear-gradient(145deg,#121c2a,#0e1622);border:1px solid #243247;border-radius:18px;padding:15px}.ai-head{display:flex;align-items:center;gap:8px;margin-bottom:9px}.ai-badge{font-size:9px;font-weight:900;padding:4px 7px;border-radius:7px;background:#8c6cff26;color:var(--purple);border:1px solid #8c6cff40}.ai-title{font-size:13px;font-weight:800}.ai-text{font-size:12px;line-height:1.6;color:#c5d0dc}
+.score-card{margin-top:10px}.score-head{display:flex;justify-content:space-between;align-items:center}.score-title{font-size:13px;font-weight:800}.score-value{font-size:24px;font-weight:900}.score-bar{height:8px;margin-top:12px;background:#202a37;border-radius:10px;overflow:hidden}.score-fill{height:100%;width:0;border-radius:10px;transition:width .7s ease}.score-label{margin-top:8px;color:var(--muted);font-size:11px}.breakdown{margin-top:11px;padding-top:10px;border-top:1px solid var(--border);display:grid;gap:5px}.bd-row{display:flex;justify-content:space-between;font-size:10px;color:var(--muted)}.bd-row span:last-child{font-weight:800;color:#b8c4d4}
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;margin-top:10px}.stat{background:var(--card);border:1px solid var(--border);border-radius:15px;padding:13px}.stat-label{color:var(--muted);font-size:9px;text-transform:uppercase;letter-spacing:.5px}.stat-value{margin-top:6px;font-size:15px;font-weight:800;word-break:break-word}
+.holders-card{margin-top:10px}.section-title{font-size:13px;font-weight:800;margin-bottom:11px}.conc-bar{height:7px;background:#202a37;border-radius:8px;overflow:hidden;margin-bottom:6px}.conc-fill{height:100%;border-radius:8px}.conc-label{font-size:10px;color:var(--muted);margin-bottom:10px}.holder-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #1b2531;font-size:11px}.holder-row:last-child{border-bottom:0}.holder-addr{color:#a9b7c8;font-family:monospace;font-size:10px}.holder-pct{font-weight:800}
+.security{margin-top:10px}.check{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid #1b2531}.check:last-child{border-bottom:0}.check-icon{width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;background:#182331;flex-shrink:0}.check-text{flex:1}.check-name{font-size:12px;font-weight:700}.check-status{margin-top:2px;color:var(--muted);font-size:10px}
+.socials{margin-top:10px;display:flex;flex-wrap:wrap;gap:7px}.social-btn{padding:8px 11px;border-radius:10px;background:#111925;border:1px solid var(--border);color:#dbe5ef;font-size:10px;font-weight:700;text-decoration:none}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}.action{height:45px;border-radius:12px;border:1px solid var(--border);background:#111925;color:#dbe5ef;font-weight:800;font-size:11px;cursor:pointer}.action.primary{background:#13263a;border-color:#1e4b70;color:var(--blue)}.action.fav.active{background:#ffc8571f;border-color:#ffc8574d;color:var(--yellow)}
+.address-box{margin-top:10px;background:#0b1119;border:1px solid var(--border);border-radius:14px;padding:12px}.address-title{color:var(--muted);font-size:9px;margin-bottom:6px}.address{font-family:monospace;font-size:10px;color:#a9b7c8;word-break:break-all;line-height:1.5}.meta-line{margin-top:8px;font-size:9px;color:#5a6a7c;display:flex;justify-content:space-between}
+.list-view{display:none;margin-top:8px}.list-item{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:12px;margin-bottom:8px;display:flex;align-items:center;gap:10px;cursor:pointer}.list-img,.list-fallback{width:40px;height:40px;border-radius:11px;flex-shrink:0}.list-img{object-fit:cover;background:#0a1018;border:1px solid #2b3746}.list-fallback{display:flex;align-items:center;justify-content:center;font-weight:900;background:linear-gradient(135deg,#3da9ff,#8c6cff)}.list-name{font-size:13px;font-weight:700}.list-sym{font-size:10px;color:var(--blue);margin-top:2px}.list-score{margin-left:auto;font-size:12px;font-weight:900}.empty{text-align:center;padding:40px 20px;color:var(--muted);font-size:12px}.footer{margin-top:21px;text-align:center;color:#4d5b6c;font-size:9px;line-height:1.6}.footer strong{color:#657386}
+@media(max-width:390px){.hero h1{font-size:23px}.scan-btn{width:88px}.network{display:none}}
 </style>
 </head>
-
 <body>
-
 <div class="app">
-
-  <header class="header">
-    <div class="brand">
-      <img
-        class="logo"
-        src="https://raw.githubusercontent.com/aytekinm099-pixel/Noventra-Signal/main/logo.png"
-        onerror="this.style.display='none'"
-        alt="Noventra">
-      <div>
-        <div class="brand-title">Noventra Scan</div>
-        <div class="brand-sub">TON Token Intelligence</div>
-      </div>
-    </div>
-
-    <div class="network">
-      TON MAINNET
-    </div>
-  </header>
-
-
-  <section class="hero">
-    <h1>Analyze before you enter.</h1>
-    <p>
-      Scan a TON Jetton and instantly inspect
-      its identity, supply, holders, verification
-      and basic contract risk signals.
-    </p>
-  </section>
-
-
-  <section class="search-card">
-
-    <div class="search-label">
-      Jetton Master Address
-    </div>
-
-    <div class="search-row">
-
-      <input
-        id="addressInput"
-        type="text"
-        autocomplete="off"
-        autocorrect="off"
-        spellcheck="false"
-        placeholder="EQ... / UQ...">
-
-      <button
-        class="scan-btn"
-        onclick="scanToken()">
-        SCAN
-      </button>
-
-    </div>
-
-    <div class="example">
-      Enter the Jetton master contract address.
-      Noventra does not ask for your seed phrase or private key.
-    </div>
-
-  </section>
-
-
-  <div class="loading" id="loading">
-    <div class="spinner"></div>
-    Reading TON blockchain data...
+<header class="header">
+  <div class="brand">
+    <img class="logo" src="https://raw.githubusercontent.com/aytekinm099-pixel/Noventra-Signal/main/logo.png" onerror="this.style.display='none'" alt="Noventra">
+    <div><div class="brand-title">Noventra Scan</div><div class="brand-sub" data-i18n="subtitle">TON Token Intelligence</div></div>
   </div>
-
-
-  <div class="error" id="error"></div>
-
-
-  <main class="result" id="result">
-
-    <section class="token-card">
-
-      <div class="token-top">
-
-        <img
-          id="tokenImage"
-          class="token-image"
-          src=""
-          alt="Token">
-
-        <div>
-          <div id="tokenName" class="token-name">
-            —
-          </div>
-
-          <div id="tokenSymbol" class="token-symbol">
-            —
-          </div>
-        </div>
-
-        <div
-          id="verification"
-          class="verify">
-          —
-        </div>
-
-      </div>
-
-      <div
-        id="description"
-        class="description">
-      </div>
-
-    </section>
-
-
-    <section class="score-card">
-
-      <div class="score-head">
-
-        <div class="score-title">
-          Noventra Risk Score
-        </div>
-
-        <div
-          id="scoreValue"
-          class="score-value">
-          —
-        </div>
-
-      </div>
-
-      <div class="score-bar">
-        <div
-          id="scoreFill"
-          class="score-fill">
-        </div>
-      </div>
-
-      <div
-        id="scoreLabel"
-        class="score-label">
-        Analyzing token signals...
-      </div>
-
-    </section>
-
-
-    <section class="stats">
-
-      <div class="stat">
-        <div class="stat-label">
-          Holders
-        </div>
-
-        <div
-          id="holders"
-          class="stat-value">
-          —
-        </div>
-      </div>
-
-
-      <div class="stat">
-        <div class="stat-label">
-          Total Supply
-        </div>
-
-        <div
-          id="supply"
-          class="stat-value">
-          —
-        </div>
-      </div>
-
-
-      <div class="stat">
-        <div class="stat-label">
-          Decimals
-        </div>
-
-        <div
-          id="decimals"
-          class="stat-value">
-          —
-        </div>
-      </div>
-
-
-      <div class="stat">
-        <div class="stat-label">
-          Mintable
-        </div>
-
-        <div
-          id="mintable"
-          class="stat-value">
-          —
-        </div>
-      </div>
-
-    </section>
-
-
-    <section class="security">
-
-      <div class="section-title">
-        Security Signals
-      </div>
-
-
-      <div class="check">
-
-        <div
-          id="verifyIcon"
-          class="check-icon">
-          ?
-        </div>
-
-        <div class="check-text">
-
-          <div class="check-name">
-            Token Verification
-          </div>
-
-          <div
-            id="verifyStatus"
-            class="check-status">
-            —
-          </div>
-
-        </div>
-
-      </div>
-
-
-      <div class="check">
-
-        <div
-          id="mintIcon"
-          class="check-icon">
-          ?
-        </div>
-
-        <div class="check-text">
-
-          <div class="check-name">
-            Mint Authority
-          </div>
-
-          <div
-            id="mintStatus"
-            class="check-status">
-            —
-          </div>
-
-        </div>
-
-      </div>
-
-
-      <div class="check">
-
-        <div
-          id="holderIcon"
-          class="check-icon">
-          ?
-        </div>
-
-        <div class="check-text">
-
-          <div class="check-name">
-            Holder Distribution
-          </div>
-
-          <div
-            id="holderStatus"
-            class="check-status">
-            —
-          </div>
-
-        </div>
-
-      </div>
-
-
-      <div class="check">
-
-        <div
-          id="adminIcon"
-          class="check-icon">
-          ?
-        </div>
-
-        <div class="check-text">
-
-          <div class="check-name">
-            Admin Contract
-          </div>
-
-          <div
-            id="adminStatus"
-            class="check-status">
-            —
-          </div>
-
-        </div>
-
-      </div>
-
-    </section>
-
-
-    <section class="actions">
-
-      <button
-        class="action primary"
-        onclick="openExplorer()">
-        TON EXPLORER
-      </button>
-
-      <button
-        class="action"
-        onclick="copyAddress()">
-        COPY ADDRESS
-      </button>
-
-    </section>
-
-
-    <section class="address-box">
-
-      <div class="address-title">
-        JETTON MASTER ADDRESS
-      </div>
-
-      <div
-        id="addressDisplay"
-        class="address">
-        —
-      </div>
-
-    </section>
-
-  </main>
-
-
-  <footer class="footer">
-    <strong>Noventra Scan</strong><br>
-    On-chain intelligence for TON.
-  </footer>
-
+  <div class="header-right">
+    <div class="network">TON MAINNET</div>
+    <button class="lang-btn" id="langBtn" onclick="toggleLangMenu()">EN ▾</button>
+  </div>
+</header>
+<div class="lang-menu" id="langMenu">
+  <button onclick="setLanguage('en')">🇬🇧 English</button>
+  <button onclick="setLanguage('tr')">🇹🇷 Türkçe</button>
 </div>
 
+<nav class="nav">
+  <button class="nav-btn active" data-view="scan" onclick="switchView('scan')" data-i18n="scan">Scan</button>
+  <button class="nav-btn" data-view="history" onclick="switchView('history')" data-i18n="history">History</button>
+  <button class="nav-btn" data-view="favorites" onclick="switchView('favorites')" data-i18n="favorites">Favorites</button>
+</nav>
+
+<div id="view-scan">
+<section class="hero">
+  <h1 data-i18n="heroTitle">Analyze before you enter.</h1>
+  <p data-i18n="heroText">Scan a TON Jetton and review identity, holders, concentration, verification and risk signals.</p>
+</section>
+
+<section class="search-card">
+  <div class="search-label" data-i18n="addressLabel">Jetton Master Address</div>
+  <div class="search-row">
+    <input id="addressInput" type="text" autocomplete="off" autocorrect="off" spellcheck="false" placeholder="EQ... / UQ...">
+    <button class="scan-btn" onclick="scanToken()" data-i18n="scanBtn">SCAN</button>
+  </div>
+  <div class="example" data-i18n="example">Enter the Jetton master contract. Noventra never asks for your seed phrase or private key.</div>
+</section>
+
+<div class="loading" id="loading">
+  <div class="skel-card skeleton"></div><div class="skel-score skeleton"></div>
+  <div class="skel-row"><div class="skel-stat skeleton"></div><div class="skel-stat skeleton"></div></div>
+</div>
+<div class="error" id="error"></div>
+
+<main class="result" id="result">
+<section class="token-card">
+  <div class="token-top">
+    <img id="tokenImage" class="token-image" src="" alt="">
+    <div id="tokenFallback" class="token-fallback">?</div>
+    <div class="token-info"><div id="tokenName" class="token-name">—</div><div id="tokenSymbol" class="token-symbol">—</div></div>
+    <div id="verification" class="verify">—</div>
+  </div>
+  <div id="description" class="description"></div>
+  <div id="descToggle" class="desc-toggle" onclick="toggleDesc()" data-i18n="showMore">Show more</div>
+</section>
+
+<section class="ai-card">
+  <div class="ai-head"><div class="ai-badge">NOVENTRA</div><div class="ai-title" data-i18n="assessment">Risk Intelligence</div></div>
+  <div id="aiText" class="ai-text">Analyzing signals...</div>
+</section>
+
+<section class="score-card">
+  <div class="score-head"><div class="score-title" data-i18n="riskScore">Noventra Risk Score</div><div id="scoreValue" class="score-value">—</div></div>
+  <div class="score-bar"><div id="scoreFill" class="score-fill"></div></div>
+  <div id="scoreLabel" class="score-label">Analyzing...</div>
+  <div id="breakdown" class="breakdown"></div>
+</section>
+
+<section class="stats">
+  <div class="stat"><div class="stat-label" data-i18n="holders">Holders</div><div id="holders" class="stat-value">—</div></div>
+  <div class="stat"><div class="stat-label" data-i18n="supply">Total Supply</div><div id="supply" class="stat-value">—</div></div>
+  <div class="stat"><div class="stat-label" data-i18n="decimals">Decimals</div><div id="decimals" class="stat-value">—</div></div>
+  <div class="stat"><div class="stat-label" data-i18n="mintable">Mintable</div><div id="mintable" class="stat-value">—</div></div>
+  <div class="stat"><div class="stat-label" data-i18n="top10">Top 10 Conc.</div><div id="concentration" class="stat-value">—</div></div>
+  <div class="stat"><div class="stat-label" data-i18n="admin">Admin</div><div id="adminStat" class="stat-value">—</div></div>
+</section>
+
+<section class="holders-card" id="holdersSection" style="display:none">
+  <div class="section-title" data-i18n="holderConcentration">Holder Concentration</div>
+  <div class="conc-bar"><div id="concFill" class="conc-fill"></div></div>
+  <div id="concLabel" class="conc-label">—</div><div id="holdersList"></div>
+</section>
+
+<section class="security">
+  <div class="section-title" data-i18n="securitySignals">Security Signals</div>
+  <div class="check"><div id="verifyIcon" class="check-icon">?</div><div class="check-text"><div class="check-name" data-i18n="tokenVerification">Token Verification</div><div id="verifyStatus" class="check-status">—</div></div></div>
+  <div class="check"><div id="mintIcon" class="check-icon">?</div><div class="check-text"><div class="check-name" data-i18n="mintAuthority">Mint Authority</div><div id="mintStatus" class="check-status">—</div></div></div>
+  <div class="check"><div id="holderIcon" class="check-icon">?</div><div class="check-text"><div class="check-name" data-i18n="holderDistribution">Holder Distribution</div><div id="holderStatus" class="check-status">—</div></div></div>
+  <div class="check"><div id="adminIcon" class="check-icon">?</div><div class="check-text"><div class="check-name" data-i18n="adminContract">Admin Contract</div><div id="adminStatus" class="check-status">—</div></div></div>
+  <div class="check"><div id="concIcon" class="check-icon">?</div><div class="check-text"><div class="check-name" data-i18n="ownership">Ownership Concentration</div><div id="concStatus" class="check-status">—</div></div></div>
+</section>
+
+<div id="socials" class="socials" style="display:none"></div>
+
+<section class="actions">
+  <button class="action primary" onclick="openExplorer()" data-i18n="explorer">TON EXPLORER</button>
+  <button class="action" onclick="copyAddress()" data-i18n="copy">COPY ADDRESS</button>
+  <button class="action" id="favBtn" onclick="toggleFavorite()" data-i18n="favorite">★ FAVORITE</button>
+  <button class="action" onclick="shareResult()" data-i18n="share">SHARE</button>
+</section>
+
+<section class="address-box">
+  <div class="address-title" data-i18n="masterAddress">JETTON MASTER ADDRESS</div>
+  <div id="addressDisplay" class="address">—</div>
+  <div class="meta-line"><span id="lastUpdated">—</span><span style="color:var(--blue);cursor:pointer;font-weight:800" onclick="scanToken(true)" data-i18n="refresh">↻ Refresh</span></div>
+</section>
+</main>
+</div>
+
+<div id="view-history" class="list-view"><div id="historyList"></div></div>
+<div id="view-favorites" class="list-view"><div id="favoritesList"></div></div>
+
+<footer class="footer"><strong>Noventra Scan</strong><br><span data-i18n="footer">On-chain intelligence for TON · Not financial advice</span></footer>
+</div>
 
 <script>
+const tg=window.Telegram?.WebApp;
+if(tg){tg.ready();tg.expand();tg.setHeaderColor?.("#070b12");tg.setBackgroundColor?.("#070b12");}
 
-const tg = window.Telegram?.WebApp;
+const API_BASE="https://tonapi.io/v2";
+const HISTORY_KEY="noventra_history_v3";
+const FAVORITES_KEY="noventra_favorites_v3";
+const LANG_KEY="noventra_scan_language";
+let currentAddress="",currentData=null,currentScore=0,currentConcentration=0,fullDescription="",descExpanded=false;
 
-if(tg){
-  tg.ready();
-  tg.expand();
+const T={
+en:{
+subtitle:"TON Token Intelligence",scan:"Scan",history:"History",favorites:"Favorites",
+heroTitle:"Analyze before you enter.",heroText:"Scan a TON Jetton and review identity, holders, concentration, verification and risk signals.",
+addressLabel:"Jetton Master Address",scanBtn:"SCAN",example:"Enter the Jetton master contract. Noventra never asks for your seed phrase or private key.",
+showMore:"Show more",showLess:"Show less",assessment:"Risk Intelligence",riskScore:"Noventra Risk Score",
+holders:"Holders",supply:"Total Supply",decimals:"Decimals",mintable:"Mintable",top10:"Top 10 Conc.",admin:"Admin",
+holderConcentration:"Holder Concentration",securitySignals:"Security Signals",tokenVerification:"Token Verification",
+mintAuthority:"Mint Authority",holderDistribution:"Holder Distribution",adminContract:"Admin Contract",ownership:"Ownership Concentration",
+explorer:"TON EXPLORER",copy:"COPY ADDRESS",favorite:"★ FAVORITE",favorited:"★ FAVORITED",share:"SHARE",masterAddress:"JETTON MASTER ADDRESS",
+refresh:"↻ Refresh",footer:"On-chain intelligence for TON · Not financial advice",verified:"VERIFIED",blacklisted:"BLACKLISTED",unknown:"UNKNOWN",
+yes:"YES",no:"NO",analyzing:"Analyzing...",low:"LOW RISK SIGNAL",moderate:"MODERATE RISK SIGNAL",high:"HIGH RISK SIGNAL",veryHigh:"VERY HIGH RISK SIGNAL",
+healthy:"Healthy",caution:"Use caution",none:"None detected",updated:"Updated just now",copied:"Copied",addressCopied:"Jetton address copied.",
+invalid:"Invalid TON address. Use a Jetton master address beginning with EQ or UQ.",notFound:"Jetton not found. Check the master contract address.",
+rateLimit:"TONAPI rate limit reached. Please wait and try again.",requestFailed:"TONAPI request failed.",noDescription:"No token description available.",
+noHistory:"No scans yet.<br>Scan a Jetton to build history.",noFavorites:"No favorites yet.<br>Tap ★ on any result to save it.",
+verifiedStatus:"Verified token.",unverifiedStatus:"Not formally verified.",mintOn:"Mint authority is active.",mintOff:"Minting appears disabled.",
+holderHealthy:"Holder count is healthy.",holderLow:"Low holder count — use caution.",adminDetected:"Admin address detected.",adminNone:"No admin address reported.",
+concHigh:"High concentration.",concExtreme:"Extreme concentration risk.",concOk:"Acceptable distribution.",concUnavailable:"Concentration data unavailable."
+},
+tr:{
+subtitle:"TON Token Analizi",scan:"Tarama",history:"Geçmiş",favorites:"Favoriler",
+heroTitle:"Girmeden önce analiz et.",heroText:"Bir TON Jetton'u tarayın; kimlik, holder, yoğunluk, doğrulama ve risk sinyallerini inceleyin.",
+addressLabel:"Jetton Master Adresi",scanBtn:"TARA",example:"Jetton master kontrat adresini girin. Noventra seed phrase veya private key istemez.",
+showMore:"Daha fazla göster",showLess:"Daha az göster",assessment:"Risk Analizi",riskScore:"Noventra Risk Skoru",
+holders:"Holder",supply:"Toplam Arz",decimals:"Ondalık",mintable:"Mint Edilebilir",top10:"İlk 10 Yoğunluğu",admin:"Admin",
+holderConcentration:"Holder Yoğunluğu",securitySignals:"Güvenlik Sinyalleri",tokenVerification:"Token Doğrulaması",
+mintAuthority:"Mint Yetkisi",holderDistribution:"Holder Dağılımı",adminContract:"Admin Kontratı",ownership:"Sahiplik Yoğunluğu",
+explorer:"TON EXPLORER",copy:"ADRESİ KOPYALA",favorite:"★ FAVORİ",favorited:"★ FAVORİLENDİ",share:"PAYLAŞ",masterAddress:"JETTON MASTER ADRESİ",
+refresh:"↻ Yenile",footer:"TON için zincir üstü analiz · Yatırım tavsiyesi değildir",verified:"DOĞRULANDI",blacklisted:"KARA LİSTE",unknown:"BİLİNMİYOR",
+yes:"EVET",no:"HAYIR",analyzing:"Analiz ediliyor...",low:"DÜŞÜK RİSK SİNYALİ",moderate:"ORTA RİSK SİNYALİ",high:"YÜKSEK RİSK SİNYALİ",veryHigh:"ÇOK YÜKSEK RİSK SİNYALİ",
+healthy:"Sağlıklı",caution:"Dikkatli olun",none:"Yok",updated:"Az önce güncellendi",copied:"Kopyalandı",addressCopied:"Jetton adresi kopyalandı.",
+invalid:"Geçersiz TON adresi. EQ veya UQ ile başlayan bir Jetton master adresi kullanın.",notFound:"Jetton bulunamadı. Master kontrat adresini kontrol edin.",
+rateLimit:"TONAPI hız limiti aşıldı. Lütfen bekleyip tekrar deneyin.",requestFailed:"TONAPI isteği başarısız oldu.",noDescription:"Token açıklaması bulunamadı.",
+noHistory:"Henüz tarama yok.<br>Geçmiş oluşturmak için bir Jetton tarayın.",noFavorites:"Henüz favori yok.<br>Sonuçlardan ★ butonuna basarak kaydedin.",
+verifiedStatus:"Doğrulanmış token.",unverifiedStatus:"Resmi olarak doğrulanmamış.",mintOn:"Mint yetkisi aktif.",mintOff:"Mint işlemi şu anda kapalı görünüyor.",
+holderHealthy:"Holder sayısı iyi.",holderLow:"Holder sayısı düşük — dikkatli olun.",adminDetected:"Admin adresi tespit edildi.",adminNone:"Admin adresi raporlanmadı.",
+concHigh:"Yüksek yoğunluk.",concExtreme:"Aşırı yoğunluk riski.",concOk:"Kabul edilebilir dağılım.",concUnavailable:"Yoğunluk verisi kullanılamıyor."
+}};
+let lang=localStorage.getItem(LANG_KEY)||"en";
+if(!T[lang])lang="en";
 
-  if(tg.setHeaderColor){
-    tg.setHeaderColor("#070b12");
-  }
+function $(id){return document.getElementById(id)}
+function t(k){return T[lang][k]??T.en[k]??k}
+function applyLanguage(){
+  document.documentElement.lang=lang;
+  document.querySelectorAll("[data-i18n]").forEach(el=>el.innerHTML=t(el.dataset.i18n));
+  $("langBtn").textContent=(lang==="tr"?"TR":"EN")+" ▾";
+  if(currentData)renderToken(currentData,null,false);
+}
+function toggleLangMenu(){const m=$("langMenu");m.style.display=m.style.display==="block"?"none":"block"}
+function setLanguage(v){lang=v;localStorage.setItem(LANG_KEY,v);$("langMenu").style.display="none";applyLanguage();haptic("light")}
+document.addEventListener("click",e=>{if(!e.target.closest(".lang-btn")&&!e.target.closest(".lang-menu"))$("langMenu").style.display="none"});
 
-  if(tg.setBackgroundColor){
-    tg.setBackgroundColor("#070b12");
-  }
+function haptic(type="light"){try{tg?.HapticFeedback?.impactOccurred(type)}catch(e){}}
+function showLoading(v){$("loading").style.display=v?"block":"none"}
+function showError(msg){$("error").textContent=msg;$("error").style.display="block"}
+function clearError(){$("error").textContent="";$("error").style.display="none"}
+function formatNumber(v){if(v==null)return"—";const n=Number(v);return Number.isFinite(n)?new Intl.NumberFormat(lang==="tr"?"tr-TR":"en-US",{maximumFractionDigits:2}).format(n):String(v)}
+function formatSupply(raw,decimals){
+  if(raw==null)return"—";try{const value=BigInt(raw),d=Number(decimals||0);if(!d)return value.toLocaleString(lang==="tr"?"tr-TR":"en-US");
+  const div=10n**BigInt(d),whole=value/div,f=(value%div).toString().padStart(d,"0").replace(/0+$/,""),result=f?`${whole}.${f}`:`${whole}`,n=Number(result);
+  return Number.isFinite(n)?new Intl.NumberFormat(lang==="tr"?"tr-TR":"en-US",{maximumFractionDigits:2}).format(n):result}catch{return String(raw)}}
+function shortAddress(a){return!a?"—":a.length<=16?a:a.slice(0,6)+"…"+a.slice(-5)}
+function verificationClass(v){v=String(v||"").toLowerCase();return v==="whitelist"||v==="verified"?"good":v==="blacklist"||v==="scam"?"bad":"warn"}
+function verificationText(v){v=String(v||"").toLowerCase();return v==="whitelist"?t("verified"):v==="blacklist"?t("blacklisted"):t("unknown")}
+function scoreColor(s){return s>=80?"var(--green)":s>=55?"var(--yellow)":"var(--red)"}
+function scoreLabel(s){return s>=80?t("low"):s>=55?t("moderate"):s>=35?t("high"):t("veryHigh")}
+function setCheck(i,s,good,title){$(i).textContent=good?"✓":"!";$(i).style.color=good?"var(--green)":"var(--yellow)";$(s).textContent=title}
+
+function getHistory(){try{return JSON.parse(localStorage.getItem(HISTORY_KEY)||"[]")}catch{return[]}}
+function saveToHistory(e){let a=getHistory().filter(x=>x.address!==e.address);a.unshift(e);localStorage.setItem(HISTORY_KEY,JSON.stringify(a.slice(0,15)))}
+function getFavorites(){try{return JSON.parse(localStorage.getItem(FAVORITES_KEY)||"[]")}catch{return[]}}
+function isFavorite(a){return getFavorites().some(x=>x.address===a)}
+function toggleFavorite(){
+  if(!currentAddress||!currentData)return;haptic("medium");let a=getFavorites(),i=a.findIndex(x=>x.address===currentAddress);
+  if(i>=0)a.splice(i,1);else a.unshift({address:currentAddress,name:currentData.metadata?.name||"Unknown",symbol:currentData.metadata?.symbol||"?",image:currentData.preview||currentData.metadata?.image||"",score:currentScore,ts:Date.now()});
+  localStorage.setItem(FAVORITES_KEY,JSON.stringify(a.slice(0,30)));updateFavButton();renderFavorites()
+}
+function updateFavButton(){const b=$("favBtn");b.classList.toggle("active",isFavorite(currentAddress));b.textContent=isFavorite(currentAddress)?t("favorited"):t("favorite")}
+
+function calculateRisk(data,conc){
+  let risk=100,bd=[],ver=String(data.verification||"").toLowerCase();
+  if(ver==="blacklist"){risk-=55;bd.push(["Blacklisted",-55])}else if(ver!=="whitelist"){risk-=12;bd.push(["Unverified",-12])}else bd.push(["Verified",0]);
+  if(data.mintable===true){risk-=14;bd.push(["Mintable",-14])}else bd.push(["Not mintable",0]);
+  const h=Number(data.holders_count||0);
+  if(h<15){risk-=18;bd.push(["Very low holders",-18])}else if(h<60){risk-=10;bd.push(["Low holders",-10])}else if(h<200){risk-=4;bd.push(["Moderate holders",-4])}else bd.push(["Solid holders",0]);
+  if(conc>=75){risk-=18;bd.push(["Extreme concentration",-18])}else if(conc>=55){risk-=10;bd.push(["High concentration",-10])}else if(conc>=35){risk-=4;bd.push(["Moderate concentration",-4])}else bd.push(["Healthy distribution",0]);
+  if(data.admin?.address||data.admin){risk-=6;bd.push(["Admin present",-6])}
+  if(!data.metadata?.name)risk-=4;if(!data.metadata?.symbol)risk-=3;
+  return{score:Math.max(0,Math.min(100,Math.round(risk))),bd}
+}
+function generateAssessment(data,conc,score){
+  const name=data.metadata?.name||"This token",h=Number(data.holders_count||0),ver=String(data.verification||"").toLowerCase(),mint=data.mintable===true,admin=!!(data.admin?.address||data.admin);
+  let p=[`${name} ${score>=80?(lang==="tr"?"nispeten olumlu":"currently presents a relatively constructive") : score>=55?(lang==="tr"?"karma":"currently presents a mixed") : score>=35?(lang==="tr"?"endişe verici":"currently presents a concerning"):(lang==="tr"?"yüksek riskli":"currently presents a high-risk")} ${lang==="tr"?"bir profil sunuyor":"risk profile"} (${score}/100).`];
+  if(ver==="whitelist")p.push(lang==="tr"?"Token doğrulanmış; bu olumlu bir sinyaldir.":"It is verified, which is a positive signal.");
+  else if(ver==="blacklist")p.push(lang==="tr"?"Kara listede görünüyor; bu güçlü bir kırmızı bayraktır.":"It appears on a blacklist; this is a strong red flag.");
+  else p.push(lang==="tr"?"Resmi doğrulaması yok; ekstra dikkat gerekir.":"It is not formally verified, so extra caution is advised.");
+  p.push(mint?(lang==="tr"?"Mint yetkisi aktif; ek arz oluşturulabilir.":"Mint authority is active; additional supply may be created."):t("mintOff"));
+  if(conc>=60)p.push(lang==="tr"?`Sahiplik yoğun (${conc.toFixed(0)}% ilk 10 holder); manipülasyon riski artabilir.`:`Ownership is heavily concentrated (${conc.toFixed(0)}% in top 10 holders).`);
+  else if(conc>=35)p.push(lang==="tr"?`İlk 10 holder toplam arzın yaklaşık ${conc.toFixed(0)}%'ını kontrol ediyor.`:`Top 10 holders control about ${conc.toFixed(0)}% of supply.`);
+  if(h<30)p.push(lang==="tr"?"Holder sayısı çok düşük.":"The holder count is very low.");
+  if(admin)p.push(lang==="tr"?"Bir admin adresi tespit edildi.":"An admin address is present.");
+  p.push(lang==="tr"?"Likiditeyi, işlemleri ve topluluğu ayrıca kontrol edin. Bu finansal tavsiye değildir.":"Cross-check liquidity, activity and community before entering. This is not financial advice.");
+  return p.join(" ")
 }
 
-
-/*
-  Noventra Scan
-  Data provider: TONAPI
-
-  TONAPI currently allows unauthenticated requests
-  with strict rate limits. For production, put your
-  TONAPI key behind your own backend/Cloudflare Worker.
-*/
-
-const API_BASE = "https://tonapi.io/v2";
-
-
-let currentAddress = "";
-
-
-function $(id){
-  return document.getElementById(id);
+function renderToken(data,holdersData,save=true){
+  currentData=data;const m=data.metadata||{},name=m.name||"Unknown Token",sym=m.symbol||"UNKNOWN",dec=m.decimals??0,ver=data.verification||"unknown";
+  $("tokenName").textContent=name;$("tokenSymbol").textContent=sym;
+  const img=data.preview||m.image||"",ie=$("tokenImage"),fb=$("tokenFallback");
+  if(img){ie.src=img;ie.style.display="block";fb.style.display="none";ie.onerror=()=>{ie.style.display="none";fb.style.display="flex";fb.textContent=sym.charAt(0).toUpperCase()}}
+  else{ie.style.display="none";fb.style.display="flex";fb.textContent=sym.charAt(0).toUpperCase()}
+  $("verification").textContent=verificationText(ver);$("verification").className="verify "+verificationClass(ver);
+  fullDescription=m.description||t("noDescription");updateDescription();
+  $("holders").textContent=formatNumber(data.holders_count);$("supply").textContent=formatSupply(data.total_supply,dec);$("decimals").textContent=dec;
+  $("mintable").textContent=data.mintable?t("yes"):t("no");$("adminStat").textContent=(data.admin?.address||data.admin)?t("yes"):t("no");$("addressDisplay").textContent=currentAddress;$("lastUpdated").textContent=t("updated");
+  let conc=0,top=[];
+  if(holdersData?.addresses?.length&&data.total_supply){try{const total=BigInt(data.total_supply);let sum=0n;top=holdersData.addresses.slice(0,10);top.forEach(x=>sum+=BigInt(x.balance||0));if(total>0n)conc=Number((sum*10000n)/total)/100}catch{}}
+  currentConcentration=conc;$("concentration").textContent=conc?conc.toFixed(1)+"%":"—";
+  const r=calculateRisk(data,conc);currentScore=r.score;$("scoreValue").textContent=r.score+"/100";$("scoreFill").style.width=r.score+"%";$("scoreFill").style.background=scoreColor(r.score);$("scoreValue").style.color=scoreColor(r.score);$("scoreLabel").textContent=scoreLabel(r.score);
+  $("breakdown").innerHTML=r.bd.map(x=>`<div class="bd-row"><span>${x[0]}</span><span>${x[1]===0?"—":x[1]}</span></div>`).join("");
+  $("aiText").textContent=generateAssessment(data,conc,r.score);
+  setCheck("verifyIcon","verifyStatus",String(ver).toLowerCase()==="whitelist",String(ver).toLowerCase()==="whitelist"?t("verifiedStatus"):String(ver).toLowerCase()==="blacklist"?t("blacklisted"):t("unverifiedStatus"));
+  setCheck("mintIcon","mintStatus",data.mintable!==true,data.mintable?t("mintOn"):t("mintOff"));
+  setCheck("holderIcon","holderStatus",Number(data.holders_count||0)>=100,Number(data.holders_count||0)>=100?t("holderHealthy"):t("holderLow"));
+  const hasAdmin=!!(data.admin?.address||data.admin);setCheck("adminIcon","adminStatus",!hasAdmin,hasAdmin?t("adminDetected"):t("adminNone"));
+  setCheck("concIcon","concStatus",conc<50,conc>=70?t("concExtreme"):conc>=50?t("concHigh"):conc?t("concOk"):t("concUnavailable"));
+  if(top.length){$("holdersSection").style.display="block";$("concFill").style.width=Math.min(100,conc)+"%";$("concFill").style.background=conc>=60?"var(--red)":conc>=40?"var(--yellow)":"var(--green)";$("concLabel").textContent=(lang==="tr"?"İlk 10 holder arzın ":"Top 10 holders control ")+conc.toFixed(1)+(lang==="tr"?"%'ini kontrol ediyor":"% of supply");$("holdersList").innerHTML=top.map((h,i)=>{let pct="—";try{const b=BigInt(h.balance||0),tot=BigInt(data.total_supply||0);if(tot>0n)pct=(Number((b*10000n)/tot)/100).toFixed(2)+"%"}catch{}return`<div class="holder-row"><span class="holder-addr">#${i+1} ${shortAddress(h.owner?.address||h.address)}</span><span class="holder-pct">${pct}</span></div>`}).join("")}
+  else $("holdersSection").style.display="none";
+  const socials=[];(m.websites||[]).slice(0,2).forEach(u=>socials.push({label:"Website",url:u}));["twitter","telegram","github","discord"].forEach(k=>{if(m[k])socials.push({label:k[0].toUpperCase()+k.slice(1),url:m[k]})});
+  $("socials").style.display=socials.length?"flex":"none";$("socials").innerHTML=socials.slice(0,4).map(s=>`<a class="social-btn" href="${s.url}" target="_blank" rel="noopener">${s.label}</a>`).join("");
+  updateFavButton();$("result").style.display="block";
+  if(save)saveToHistory({address:currentAddress,name,symbol:sym,image:img,score:r.score,ts:Date.now()});
 }
 
+function updateDescription(){const e=$("description"),b=$("descToggle");if(fullDescription.length>160){e.textContent=descExpanded?fullDescription:fullDescription.slice(0,150)+"…";b.style.display="block";b.textContent=descExpanded?t("showLess"):t("showMore")}else{e.textContent=fullDescription;b.style.display="none"}}
+function toggleDesc(){descExpanded=!descExpanded;updateDescription()}
 
-function showLoading(state){
-
-  $("loading").style.display =
-    state ? "block" : "none";
-
-}
-
-
-function showError(message){
-
-  $("error").textContent = message;
-  $("error").style.display = "block";
-
-}
-
-
-function clearError(){
-
-  $("error").textContent = "";
-  $("error").style.display = "none";
-
-}
-
-
-function formatNumber(value){
-
-  if(value === null || value === undefined){
-    return "—";
-  }
-
-  const num = Number(value);
-
-  if(!Number.isFinite(num)){
-    return String(value);
-  }
-
-  return new Intl.NumberFormat("en-US", {
-    maximumFractionDigits: 2
-  }).format(num);
-
-}
-
-
-function formatSupply(raw, decimals){
-
-  if(raw === null || raw === undefined){
-    return "—";
-  }
-
+async function scanToken(refresh=false){
+  clearError();const input=refresh?currentAddress:$("addressInput").value.trim();
+  if(!input){showError(t("invalid"));return}
+  const valid=/^(EQ|UQ)[A-Za-z0-9_-]{46}$/.test(input)||/^-?\d+:[a-fA-F0-9]{64}$/.test(input);
+  if(!valid){$("addressInput").classList.add("invalid");showError(t("invalid"));return}
+  $("addressInput").classList.remove("invalid");currentAddress=input;$("addressInput").value=input;$("result").style.display="none";showLoading(true);haptic("light");
   try{
-
-    const value = BigInt(raw);
-
-    const d = Number(decimals || 0);
-
-    if(d === 0){
-      return value.toLocaleString("en-US");
-    }
-
-    const divisor = 10n ** BigInt(d);
-
-    const whole = value / divisor;
-
-    const fraction =
-      (value % divisor)
-      .toString()
-      .padStart(d, "0")
-      .replace(/0+$/,"");
-
-    const result =
-      fraction.length
-        ? `${whole}.${fraction}`
-        : `${whole}`;
-
-    const numberValue = Number(result);
-
-    if(Number.isFinite(numberValue)){
-      return new Intl.NumberFormat("en-US", {
-        maximumFractionDigits: 2
-      }).format(numberValue);
-    }
-
-    return result;
-
-  }catch(e){
-
-    return String(raw);
-
-  }
-
+    const r=await fetch(`${API_BASE}/jettons/${encodeURIComponent(input)}`);
+    if(!r.ok){if(r.status===404)throw Error(t("notFound"));if(r.status===429)throw Error(t("rateLimit"));throw Error(`${t("requestFailed")} (${r.status})`)}
+    const data=await r.json();
+    // Holders are fetched separately. Without an API key, keep the first scan lightweight.
+    let hd=null;
+    try{
+      await new Promise(resolve=>setTimeout(resolve,4200));
+      const hr=await fetch(`${API_BASE}/jettons/${encodeURIComponent(input)}/holders?limit=12&offset=0`);
+      if(hr.ok)hd=await hr.json();
+    }catch{}
+    renderToken(data,hd,true);haptic("medium");
+  }catch(e){console.error(e);showError(e.message||t("requestFailed"));haptic("heavy")}
+  finally{showLoading(false)}
 }
 
-
-function shortAddress(address){
-
-  if(!address){
-    return "—";
-  }
-
-  if(address.length <= 18){
-    return address;
-  }
-
-  return address.slice(0,9) +
-    "..." +
-    address.slice(-7);
-
-}
-
-
-function verificationClass(value){
-
-  const v = String(value || "").toLowerCase();
-
-  if(
-    v === "whitelist" ||
-    v === "verified"
-  ){
-    return "good";
-  }
-
-  if(
-    v === "blacklist" ||
-    v === "scam"
-  ){
-    return "bad";
-  }
-
-  return "warn";
-
-}
-
-
-function verificationText(value){
-
-  const v = String(value || "").toLowerCase();
-
-  if(v === "whitelist"){
-    return "VERIFIED";
-  }
-
-  if(v === "blacklist"){
-    return "BLACKLISTED";
-  }
-
-  return "UNKNOWN";
-
-}
-
-
-function calculateRisk(data){
-
-  let risk = 100;
-
-  const verification =
-    String(data.verification || "").toLowerCase();
-
-  if(verification === "whitelist"){
-    risk += 0;
-  }
-
-  if(verification === "blacklist"){
-    risk -= 60;
-  }
-
-  if(data.mintable === true){
-    risk -= 15;
-  }
-
-  const holders =
-    Number(data.holders_count || 0);
-
-  if(holders < 10){
-    risk -= 20;
-  }else if(holders < 50){
-    risk -= 10;
-  }else if(holders < 200){
-    risk -= 5;
-  }
-
-  if(!data.metadata?.name){
-    risk -= 5;
-  }
-
-  if(!data.metadata?.symbol){
-    risk -= 5;
-  }
-
-  risk = Math.max(
-    0,
-    Math.min(100,risk)
-  );
-
-  return risk;
-
-}
-
-
-function scoreLabel(score){
-
-  if(score >= 85){
-    return "LOW RISK SIGNAL";
-  }
-
-  if(score >= 65){
-    return "MODERATE RISK SIGNAL";
-  }
-
-  if(score >= 40){
-    return "HIGH RISK SIGNAL";
-  }
-
-  return "VERY HIGH RISK SIGNAL";
-
-}
-
-
-function scoreColor(score){
-
-  if(score >= 85){
-    return "var(--green)";
-  }
-
-  if(score >= 65){
-    return "var(--yellow)";
-  }
-
-  return "var(--red)";
-
-}
-
-
-function setCheck(
-  iconId,
-  statusId,
-  good,
-  title
-){
-
-  $(iconId).textContent =
-    good ? "✓" : "!";
-
-  $(iconId).style.color =
-    good
-      ? "var(--green)"
-      : "var(--yellow)";
-
-  $(statusId).textContent =
-    title;
-
-}
-
-
-async function scanToken(){
-
-  clearError();
-
-  const input =
-    $("addressInput").value.trim();
-
-  if(!input){
-
-    showError(
-      "Please enter a TON Jetton master address."
-    );
-
-    return;
-  }
-
-  /*
-    Basic TON address validation.
-    Supports bounceable/non-bounceable friendly
-    addresses beginning with EQ/UQ or raw addresses.
-  */
-
-  const valid =
-    /^(EQ|UQ)[A-Za-z0-9_-]{46}$/.test(input) ||
-    /^-?\d+:[a-fA-F0-9]{64}$/.test(input);
-
-  if(!valid){
-
-    showError(
-      "Invalid TON address format. Use a Jetton master address beginning with EQ or UQ."
-    );
-
-    return;
-  }
-
-  currentAddress = input;
-
-  $("result").style.display = "none";
-
-  showLoading(true);
-
-  try{
-
-    const response =
-      await fetch(
-        API_BASE +
-        "/jettons/" +
-        encodeURIComponent(input)
-      );
-
-    if(!response.ok){
-
-      if(response.status === 404){
-        throw new Error(
-          "Jetton not found. Check that you entered the Jetton master contract address."
-        );
-      }
-
-      if(response.status === 429){
-        throw new Error(
-          "TONAPI rate limit reached. Please wait a few seconds and try again."
-        );
-      }
-
-      throw new Error(
-        "TONAPI request failed (" +
-        response.status +
-        ")."
-      );
-
-    }
-
-    const data =
-      await response.json();
-
-    renderToken(data);
-
-  }catch(error){
-
-    console.error(error);
-
-    showError(
-      error.message ||
-      "Unable to scan this token."
-    );
-
-  }finally{
-
-    showLoading(false);
-
-  }
-
-}
-
-
-function renderToken(data){
-
-  const metadata =
-    data.metadata || {};
-
-  const name =
-    metadata.name ||
-    "Unknown Token";
-
-  const symbol =
-    metadata.symbol ||
-    "UNKNOWN";
-
-  const decimals =
-    metadata.decimals ?? 0;
-
-  const verification =
-    data.verification || "unknown";
-
-  $("tokenName").textContent =
-    name;
-
-  $("tokenSymbol").textContent =
-    symbol;
-
-  $("tokenImage").src =
-    data.preview ||
-    metadata.image ||
-    "";
-
-  $("tokenImage").onerror =
-    function(){
-      this.style.visibility = "hidden";
-    };
-
-
-  const verificationElement =
-    $("verification");
-
-  verificationElement.textContent =
-    verificationText(verification);
-
-  verificationElement.className =
-    "verify " +
-    verificationClass(verification);
-
-
-  $("description").textContent =
-    metadata.description ||
-    "No token description available.";
-
-
-  $("holders").textContent =
-    formatNumber(data.holders_count);
-
-
-  $("supply").textContent =
-    formatSupply(
-      data.total_supply,
-      decimals
-    );
-
-
-  $("decimals").textContent =
-    decimals;
-
-
-  $("mintable").textContent =
-    data.mintable
-      ? "YES"
-      : "NO";
-
-
-  $("addressDisplay").textContent =
-    currentAddress;
-
-
-  /*
-    Risk score
-  */
-
-  const score =
-    calculateRisk(data);
-
-  $("scoreValue").textContent =
-    score + "/100";
-
-  $("scoreFill").style.width =
-    score + "%";
-
-  $("scoreFill").style.background =
-    scoreColor(score);
-
-  $("scoreValue").style.color =
-    scoreColor(score);
-
-  $("scoreLabel").textContent =
-    scoreLabel(score);
-
-
-  /*
-    Verification
-  */
-
-  setCheck(
-    "verifyIcon",
-    "verifyStatus",
-    String(verification).toLowerCase() === "whitelist",
-    verificationText(verification)
-  );
-
-
-  /*
-    Minting
-  */
-
-  setCheck(
-    "mintIcon",
-    "mintStatus",
-    data.mintable !== true,
-    data.mintable
-      ? "Mintable — additional supply may be possible."
-      : "Not currently marked as mintable."
-  );
-
-
-  /*
-    Holder count
-  */
-
-  const holderCount =
-    Number(data.holders_count || 0);
-
-  setCheck(
-    "holderIcon",
-    "holderStatus",
-    holderCount >= 100,
-    holderCount >= 100
-      ? "Holder count exceeds 100."
-      : "Low holder count — use caution."
-  );
-
-
-  /*
-    Admin
-  */
-
-  const hasAdmin =
-    !!data.admin?.address ||
-    !!data.admin;
-
-  setCheck(
-    "adminIcon",
-    "adminStatus",
-    !hasAdmin,
-    hasAdmin
-      ? "Admin address detected."
-      : "No admin address reported."
-  );
-
-
-  $("result").style.display =
-    "block";
-
-}
-
-
-function openExplorer(){
-
-  if(!currentAddress){
-    return;
-  }
-
-  const url =
-    "https://tonviewer.com/" +
-    encodeURIComponent(currentAddress);
-
-  if(tg?.openLink){
-    tg.openLink(url);
-  }else{
-    window.open(url,"_blank");
-  }
-
-}
-
-
-async function copyAddress(){
-
-  if(!currentAddress){
-    return;
-  }
-
-  try{
-
-    await navigator.clipboard.writeText(
-      currentAddress
-    );
-
-    if(tg?.showPopup){
-
-      tg.showPopup({
-        title:"Copied",
-        message:"Jetton address copied.",
-        buttons:[
-          {type:"ok"}
-        ]
-      });
-
-    }else{
-
-      alert("Address copied.");
-
-    }
-
-  }catch(e){
-
-    alert(
-      "Copy failed. Please copy the address manually."
-    );
-
-  }
-
-}
-
-
-/*
-  Enter key
-*/
-
-$("addressInput")
-  .addEventListener(
-    "keydown",
-    function(event){
-
-      if(event.key === "Enter"){
-        scanToken();
-      }
-
-    }
-  );
-
-
-/*
-  Telegram Back Button
-*/
-
-if(tg?.BackButton){
-
-  tg.BackButton.show();
-
-  tg.BackButton.onClick(
-    function(){
-
-      if($("result").style.display === "block"){
-
-        $("result").style.display = "none";
-
-      }else{
-
-        tg.close();
-
-      }
-
-    }
-  );
-
-}
-
+function openExplorer(){if(!currentAddress)return;const u="https://tonviewer.com/"+encodeURIComponent(currentAddress);tg?.openLink?tg.openLink(u):window.open(u,"_blank")}
+async function copyAddress(){if(!currentAddress)return;try{await navigator.clipboard.writeText(currentAddress);haptic("light");tg?.showPopup?tg.showPopup({title:t("copied"),message:t("addressCopied"),buttons:[{type:"ok"}]}):alert(t("addressCopied"))}catch{alert(currentAddress)}}
+function shareResult(){if(!currentData)return;const name=currentData.metadata?.name||"Token",sym=currentData.metadata?.symbol||"";const text=`Noventra Scan\n${name} (${sym})\nRisk Score: ${currentScore}/100\n${currentAddress}`;if(navigator.share)navigator.share({title:"Noventra Scan",text}).catch(()=>copyShare(text));else copyShare(text)}
+async function copyShare(text){try{await navigator.clipboard.writeText(text);tg?.showPopup?.({title:t("copied"),message:text,buttons:[{type:"ok"}]})}catch{}}
+
+function switchView(v){haptic("light");document.querySelectorAll(".nav-btn").forEach(b=>b.classList.toggle("active",b.dataset.view===v));$("view-scan").style.display=v==="scan"?"block":"none";$("view-history").style.display=v==="history"?"block":"none";$("view-favorites").style.display=v==="favorites"?"block":"none";if(v==="history")renderHistory();if(v==="favorites")renderFavorites()}
+function renderHistory(){const a=getHistory();$("historyList").innerHTML=a.length?a.map(listItemHTML).join(""):`<div class="empty">${t("noHistory")}</div>`}
+function renderFavorites(){const a=getFavorites();$("favoritesList").innerHTML=a.length?a.map(listItemHTML).join(""):`<div class="empty">${t("noFavorites")}</div>`}
+function listItemHTML(x){const img=x.image?`<img class="list-img" src="${x.image}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'>`:"";const fb=`<div class="list-fallback" style="${x.image?"display:none":""}">${(x.symbol||"?")[0]}</div>`;return`<div class="list-item" onclick="reScan('${x.address}')">${img}${fb}<div style="min-width:0;flex:1"><div class="list-name">${x.name||"Unknown"}</div><div class="list-sym">${x.symbol||""}</div></div><div class="list-score" style="color:${scoreColor(x.score||50)}">${x.score??"—"}</div></div>`}
+function reScan(a){$("addressInput").value=a;switchView("scan");scanToken()}
+
+$("addressInput").addEventListener("keydown",e=>{if(e.key==="Enter")scanToken()});
+$("addressInput").addEventListener("paste",()=>setTimeout(()=>{const v=$("addressInput").value.trim();if(/^(EQ|UQ)[A-Za-z0-9_-]{46}$/.test(v))scanToken()},80));
+if(tg?.BackButton){tg.BackButton.show();tg.BackButton.onClick(()=>{if($("result").style.display==="block"&&$("view-scan").style.display!=="none")$("result").style.display="none";else if($("view-history").style.display==="block"||$("view-favorites").style.display==="block")switchView("scan");else tg.close()})}
+applyLanguage();
 </script>
-
 </body>
-  </html>
+</html>
