@@ -175,7 +175,7 @@ const API_BASE="https://tonapi.io/v2";
 const HISTORY_KEY="noventra_history_v3";
 const FAVORITES_KEY="noventra_favorites_v3";
 const LANG_KEY="noventra_scan_language";
-let currentAddress="",currentData=null,currentScore=0,currentConcentration=0,fullDescription="",descExpanded=false;
+let currentAddress="",currentData=null,currentHoldersData=null,currentScore=0,currentConcentration=0,fullDescription="",descExpanded=false;
 
 const T={
 en:{
@@ -187,7 +187,7 @@ holders:"Holders",supply:"Total Supply",decimals:"Decimals",mintable:"Mintable",
 holderConcentration:"Holder Concentration",securitySignals:"Security Signals",tokenVerification:"Token Verification",
 mintAuthority:"Mint Authority",holderDistribution:"Holder Distribution",adminContract:"Admin Contract",ownership:"Ownership Concentration",
 explorer:"TON EXPLORER",copy:"COPY ADDRESS",favorite:"★ FAVORITE",favorited:"★ FAVORITED",share:"SHARE",masterAddress:"JETTON MASTER ADDRESS",
-refresh:"↻ Refresh",footer:"On-chain intelligence for TON · Not financial advice",verified:"VERIFIED",blacklisted:"BLACKLISTED",unknown:"UNKNOWN",
+refresh:"↻ Refresh",footer:"On-chain intelligence for TON · Signals are informational · Not financial advice",verified:"VERIFIED",blacklisted:"BLACKLISTED",unknown:"UNKNOWN",
 yes:"YES",no:"NO",analyzing:"Analyzing...",low:"LOW RISK SIGNAL",moderate:"MODERATE RISK SIGNAL",high:"HIGH RISK SIGNAL",veryHigh:"VERY HIGH RISK SIGNAL",
 healthy:"Healthy",caution:"Use caution",none:"None detected",updated:"Updated just now",copied:"Copied",addressCopied:"Jetton address copied.",
 invalid:"Invalid TON address. Use a Jetton master address beginning with EQ or UQ.",notFound:"Jetton not found. Check the master contract address.",
@@ -206,7 +206,7 @@ holders:"Holder",supply:"Toplam Arz",decimals:"Ondalık",mintable:"Mint Edilebil
 holderConcentration:"Holder Yoğunluğu",securitySignals:"Güvenlik Sinyalleri",tokenVerification:"Token Doğrulaması",
 mintAuthority:"Mint Yetkisi",holderDistribution:"Holder Dağılımı",adminContract:"Admin Kontratı",ownership:"Sahiplik Yoğunluğu",
 explorer:"TON EXPLORER",copy:"ADRESİ KOPYALA",favorite:"★ FAVORİ",favorited:"★ FAVORİLENDİ",share:"PAYLAŞ",masterAddress:"JETTON MASTER ADRESİ",
-refresh:"↻ Yenile",footer:"TON için zincir üstü analiz · Yatırım tavsiyesi değildir",verified:"DOĞRULANDI",blacklisted:"KARA LİSTE",unknown:"BİLİNMİYOR",
+refresh:"↻ Yenile",footer:"TON için zincir üstü analiz · Sinyaller bilgilendirme amaçlıdır · Yatırım tavsiyesi değildir",verified:"DOĞRULANDI",blacklisted:"KARA LİSTE",unknown:"BİLİNMİYOR",
 yes:"EVET",no:"HAYIR",analyzing:"Analiz ediliyor...",low:"DÜŞÜK RİSK SİNYALİ",moderate:"ORTA RİSK SİNYALİ",high:"YÜKSEK RİSK SİNYALİ",veryHigh:"ÇOK YÜKSEK RİSK SİNYALİ",
 healthy:"Sağlıklı",caution:"Dikkatli olun",none:"Yok",updated:"Az önce güncellendi",copied:"Kopyalandı",addressCopied:"Jetton adresi kopyalandı.",
 invalid:"Geçersiz TON adresi. EQ veya UQ ile başlayan bir Jetton master adresi kullanın.",notFound:"Jetton bulunamadı. Master kontrat adresini kontrol edin.",
@@ -225,7 +225,7 @@ function applyLanguage(){
   document.documentElement.lang=lang;
   document.querySelectorAll("[data-i18n]").forEach(el=>el.innerHTML=t(el.dataset.i18n));
   $("langBtn").textContent=(lang==="tr"?"TR":"EN")+" ▾";
-  if(currentData)renderToken(currentData,null,false);
+  if(currentData)renderToken(currentData,currentHoldersData,false);
 }
 function toggleLangMenu(){const m=$("langMenu");m.style.display=m.style.display==="block"?"none":"block"}
 function setLanguage(v){lang=v;localStorage.setItem(LANG_KEY,v);$("langMenu").style.display="none";applyLanguage();haptic("light")}
@@ -306,7 +306,13 @@ function renderToken(data,holdersData,save=true){
   const hasAdmin=!!(data.admin?.address||data.admin);setCheck("adminIcon","adminStatus",!hasAdmin,hasAdmin?t("adminDetected"):t("adminNone"));
   setCheck("concIcon","concStatus",conc<50,conc>=70?t("concExtreme"):conc>=50?t("concHigh"):conc?t("concOk"):t("concUnavailable"));
   if(top.length){$("holdersSection").style.display="block";$("concFill").style.width=Math.min(100,conc)+"%";$("concFill").style.background=conc>=60?"var(--red)":conc>=40?"var(--yellow)":"var(--green)";$("concLabel").textContent=(lang==="tr"?"İlk 10 holder arzın ":"Top 10 holders control ")+conc.toFixed(1)+(lang==="tr"?"%'ini kontrol ediyor":"% of supply");$("holdersList").innerHTML=top.map((h,i)=>{let pct="—";try{const b=BigInt(h.balance||0),tot=BigInt(data.total_supply||0);if(tot>0n)pct=(Number((b*10000n)/tot)/100).toFixed(2)+"%"}catch{}return`<div class="holder-row"><span class="holder-addr">#${i+1} ${shortAddress(h.owner?.address||h.address)}</span><span class="holder-pct">${pct}</span></div>`}).join("")}
-  else $("holdersSection").style.display="none";
+  else {
+    $("holdersSection").style.display="block";
+    $("concFill").style.width="0%";
+    $("concFill").style.background="var(--border)";
+    $("concLabel").textContent=lang==="tr"?"Holder yoğunluğu verisi bekleniyor…":"Holder concentration data is loading…";
+    $("holdersList").innerHTML="";
+  }
   const socials=[];(m.websites||[]).slice(0,2).forEach(u=>socials.push({label:"Website",url:u}));["twitter","telegram","github","discord"].forEach(k=>{if(m[k])socials.push({label:k[0].toUpperCase()+k.slice(1),url:m[k]})});
   $("socials").style.display=socials.length?"flex":"none";$("socials").innerHTML=socials.slice(0,4).map(s=>`<a class="social-btn" href="${s.url}" target="_blank" rel="noopener">${s.label}</a>`).join("");
   updateFavButton();$("result").style.display="block";
@@ -326,14 +332,25 @@ async function scanToken(refresh=false){
     const r=await fetch(`${API_BASE}/jettons/${encodeURIComponent(input)}`);
     if(!r.ok){if(r.status===404)throw Error(t("notFound"));if(r.status===429)throw Error(t("rateLimit"));throw Error(`${t("requestFailed")} (${r.status})`)}
     const data=await r.json();
-    // Holders are fetched separately. Without an API key, keep the first scan lightweight.
-    let hd=null;
-    try{
-      await new Promise(resolve=>setTimeout(resolve,4200));
-      const hr=await fetch(`${API_BASE}/jettons/${encodeURIComponent(input)}/holders?limit=12&offset=0`);
-      if(hr.ok)hd=await hr.json();
-    }catch{}
-    renderToken(data,hd,true);haptic("medium");
+
+    // Render core token data immediately. Holder data is loaded separately
+    // because unauthenticated TONAPI requests are rate-limited.
+    currentHoldersData=null;
+    renderToken(data,null,true);
+    haptic("medium");
+
+    // Load holders in the background so the user does not stare at a blank screen.
+    setTimeout(async()=>{
+      try{
+        const hr=await fetch(`${API_BASE}/jettons/${encodeURIComponent(input)}/holders?limit=12&offset=0`);
+        if(hr.ok){
+          currentHoldersData=await hr.json();
+          renderToken(currentData,currentHoldersData,false);
+        }
+      }catch(e){
+        console.debug("Holder data unavailable:",e);
+      }
+    },4100);
   }catch(e){console.error(e);showError(e.message||t("requestFailed"));haptic("heavy")}
   finally{showLoading(false)}
 }
