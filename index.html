@@ -3552,9 +3552,9 @@ async function scanToken(refresh=false){
     */
 
     const r=
-      await fetch(
-        `${API_BASE}/${encodeURIComponent(input)}`,
-        {
+  await fetch(
+    `${API_BASE}/jetton/${encodeURIComponent(input)}`,
+     {
           method:"GET",
           headers:{
             "Accept":
@@ -3621,9 +3621,9 @@ async function scanToken(refresh=false){
 
         try{
 
-          const hr=
-            await fetch(
-              `${API_BASE}/${encodeURIComponent(input)}/holders?limit=12&offset=0`,
+         const hr=
+  await fetch(
+    `${API_BASE}/jetton/${encodeURIComponent(input)}/holders?limit=12&offset=0`,
               {
                 method:"GET",
                 headers:{
