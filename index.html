@@ -1868,7 +1868,13 @@ ofSupply:
 "of supply",
 
 holderDataUnavailable:
-"Holder concentration data is currently unavailable."
+"Holder concentration data is currently unavailable.",
+
+guardianNoReasons:
+"Guardian did not return detailed reasons.",
+
+guardianAnalyzing:
+"Guardian intelligence is being analyzed..."
 
 },
 
@@ -2151,7 +2157,13 @@ ofSupply:
 "kontrol ediyor.",
 
 holderDataUnavailable:
-"Holder yoğunluğu verisi şu anda kullanılamıyor."
+"Holder yoğunluğu verisi şu anda kullanılamıyor.",
+
+guardianNoReasons:
+"Guardian detaylı neden döndürmedi.",
+
+guardianAnalyzing:
+"Guardian intelligence analiz ediliyor..."
 
 }
 
@@ -2576,593 +2588,334 @@ function updateFavButton(){
 }
 
 /* =========================================================
-   RISK ENGINE
+   GUARDIAN INTELLIGENCE
+   IMPORTANT:
+   Risk scoring is owned by the API / Guardian.
+   Frontend NEVER recalculates the score.
 ========================================================= */
 
-function calculateRisk(data,conc){
+function getIntelligence(data){
+  const i=data?.intelligence || {};
 
-  let risk=100;
+  const scoreRaw=
+    i.score ??
+    data?.score ??
+    data?.risk_score ??
+    null;
 
-  let bd=[];
+  const score=Number(scoreRaw);
 
-  const ver=
-    String(
-      data.verification||""
-    ).toLowerCase();
-
-  if(ver==="blacklist" || ver==="scam"){
-
-    risk-=55;
-
-    bd.push([
-      t("blacklisted"),
-      -55
-    ]);
-
-  }else if(
-    ver!=="whitelist" &&
-    ver!=="verified"
-  ){
-
-    risk-=12;
-
-    bd.push([
-      t("riskUnverified"),
-      -12
-    ]);
-
-  }else{
-
-    bd.push([
-      t("riskVerified"),
-      0
-    ]);
-
-  }
-
-  if(data.mintable===true){
-
-    risk-=14;
-
-    bd.push([
-      t("riskMintable"),
-      -14
-    ]);
-
-  }else{
-
-    bd.push([
-      t("riskNotMintable"),
-      0
-    ]);
-
-  }
-
-  const h=
-    Number(data.holders_count||0);
-
-  if(h<15){
-
-    risk-=18;
-
-    bd.push([
-      t("riskVeryLowHolders"),
-      -18
-    ]);
-
-  }else if(h<60){
-
-    risk-=10;
-
-    bd.push([
-      t("riskLowHolders"),
-      -10
-    ]);
-
-  }else if(h<200){
-
-    risk-=4;
-
-    bd.push([
-      t("riskModerateHolders"),
-      -4
-    ]);
-
-  }else{
-
-    bd.push([
-      t("riskSolidHolders"),
-      0
-    ]);
-
-  }
-
-  if(conc>=75){
-
-    risk-=18;
-
-    bd.push([
-      t("riskExtremeConcentration"),
-      -18
-    ]);
-
-  }else if(conc>=55){
-
-    risk-=10;
-
-    bd.push([
-      t("riskHighConcentration"),
-      -10
-    ]);
-
-  }else if(conc>=35){
-
-    risk-=4;
-
-    bd.push([
-      t("riskModerateConcentration"),
-      -4
-    ]);
-
-  }else{
-
-    bd.push([
-      t("riskHealthyDistribution"),
-      0
-    ]);
-
-  }
-
-  if(
-    data.admin?.address ||
-    data.admin
-  ){
-
-    risk-=6;
-
-    bd.push([
-      t("riskAdmin"),
-      -6
-    ]);
-
-  }
-
-  if(!data.metadata?.name){
-
-    risk-=4;
-
-    bd.push([
-      t("riskMetadata"),
-      -4
-    ]);
-
-  }
-
-  if(!data.metadata?.symbol){
-
-    risk-=3;
-
-    bd.push([
-      "Missing symbol",
-      -3
-    ]);
-
-  }
-
-  return{
-
-    score:
-      Math.max(
-        0,
-        Math.min(
-          100,
-          Math.round(risk)
-        )
-      ),
-
-    bd
-
+  return {
+    score:Number.isFinite(score)
+      ? Math.max(0,Math.min(100,Math.round(score)))
+      : null,
+    risk:String(
+      i.risk ??
+      data?.risk ??
+      ""
+    ),
+    reasons:Array.isArray(i.reasons)
+      ? i.reasons
+      : [],
+    concentration:i.concentration || null,
+    market:i.market || data?.market || null
   };
-
 }
 
-/* =========================================================
-   RISK ASSESSMENT
-========================================================= */
+function normalizeReason(reason){
+  if(reason==null)
+    return {label:"—",value:""};
 
-function generateAssessment(
-  data,
-  conc,
-  score
-){
+  if(typeof reason === "string")
+    return {label:reason,value:""};
 
-  const name=
-    data.metadata?.name ||
-    "This token";
+  if(typeof reason === "object"){
+    const label=
+      reason.label ??
+      reason.reason ??
+      reason.message ??
+      reason.title ??
+      reason.name ??
+      "Signal";
 
-  const h=
-    Number(data.holders_count||0);
+    const value=
+      reason.value ??
+      reason.impact ??
+      reason.score ??
+      reason.delta ??
+      "";
 
-  const ver=
-    String(
-      data.verification||""
-    ).toLowerCase();
-
-  const mint=
-    data.mintable===true;
-
-  const admin=
-    !!(
-      data.admin?.address ||
-      data.admin
-    );
-
-  let intro;
-
-  if(score>=80){
-
-    intro=
-      lang==="tr"
-      ? `${name} şu anda nispeten olumlu bir risk profili sunuyor (${score}/100).`
-      : `${name} currently presents a relatively constructive risk profile (${score}/100).`;
-
-  }else if(score>=55){
-
-    intro=
-      lang==="tr"
-      ? `${name} şu anda karma bir risk profili sunuyor (${score}/100).`
-      : `${name} currently presents a mixed risk profile (${score}/100).`;
-
-  }else if(score>=35){
-
-    intro=
-      lang==="tr"
-      ? `${name} şu anda endişe verici bir risk profili sunuyor (${score}/100).`
-      : `${name} currently presents a concerning risk profile (${score}/100).`;
-
-  }else{
-
-    intro=
-      lang==="tr"
-      ? `${name} yüksek riskli bir profil gösteriyor (${score}/100).`
-      : `${name} currently presents a high-risk profile (${score}/100).`;
-
+    return {
+      label:String(label),
+      value:value==null ? "" : String(value)
+    };
   }
 
-  let p=[intro];
+  return {label:String(reason),value:""};
+}
 
-  if(
-    ver==="whitelist" ||
-    ver==="verified"
-  ){
+function guardianRiskLabel(intel){
+  const risk=String(intel?.risk||"").toLowerCase();
 
-    p.push(
-      t("assessmentVerified")
-    );
+  if(risk.includes("very") && risk.includes("high"))
+    return t("veryHigh");
 
-  }else if(
-    ver==="blacklist" ||
-    ver==="scam"
-  ){
+  if(risk.includes("high"))
+    return t("high");
 
-    p.push(
-      t("assessmentBlacklist")
-    );
+  if(risk.includes("moderate") || risk.includes("medium"))
+    return t("moderate");
 
-  }else{
+  if(risk.includes("low"))
+    return t("low");
 
-    p.push(
-      t("assessmentUnverified")
-    );
+  if(Number.isFinite(intel?.score))
+    return scoreLabel(intel.score);
 
+  return t("analyzing");
+}
+
+function concentrationFromGuardian(intel){
+  const c=intel?.concentration;
+
+  if(c==null)
+    return null;
+
+  if(typeof c === "number")
+    return c;
+
+  const candidates=[
+    c.top10,
+    c.top10Percent,
+    c.top10_percentage,
+    c.percentage,
+    c.percent,
+    c.value
+  ];
+
+  for(const v of candidates){
+    const n=Number(v);
+    if(Number.isFinite(n))
+      return n<=1 ? n*100 : n;
   }
 
-  p.push(
-    mint
-    ? t("assessmentMint")
-    : t("assessmentMintOff")
-  );
+  return null;
+}
 
-  if(conc>=60){
+function holdersFromGuardian(data){
+  const h=data?.holders;
 
-    p.push(
-      lang==="tr"
-      ? `Sahiplik yoğun (${conc.toFixed(0)}% ilk 10 holder); manipülasyon riski artabilir.`
-      : `Ownership is heavily concentrated (${conc.toFixed(0)}% in the top 10 holders).`
-    );
+  if(Array.isArray(h))
+    return h;
 
-  }else if(conc>=35){
+  if(Array.isArray(h?.addresses))
+    return h.addresses;
 
-    p.push(
-      lang==="tr"
-      ? `İlk 10 holder toplam arzın yaklaşık ${conc.toFixed(0)}%'ını kontrol ediyor.`
-      : `The top 10 holders control about ${conc.toFixed(0)}% of supply.`
-    );
+  if(Array.isArray(data?.holders_data?.addresses))
+    return data.holders_data.addresses;
 
+  if(Array.isArray(data?.holdersData?.addresses))
+    return data.holdersData.addresses;
+
+  return [];
+}
+
+function reasonRowsHTML(reasons){
+  if(!reasons.length){
+    return `<div class="bd-row"><span>${t("guardianNoReasons")}</span><span>—</span></div>`;
   }
 
-  if(h<30){
+  return reasons
+    .slice(0,12)
+    .map(normalizeReason)
+    .map(x=>`
+      <div class="bd-row">
+        <span>${escapeHTML(x.label)}</span>
+        <span>${escapeHTML(x.value)}</span>
+      </div>
+    `)
+    .join("");
+}
 
-    p.push(
-      lang==="tr"
-      ? "Holder sayısı çok düşük."
-      : "The holder count is very low."
-    );
-
-  }
-
-  if(admin){
-
-    p.push(
-      lang==="tr"
-      ? "Bir admin adresi tespit edildi."
-      : "An admin address is present."
-    );
-
-  }
-
-  p.push(
-    t("assessmentLiquidity")
-  );
-
-  return p.join(" ");
-
+function escapeHTML(v){
+  return String(v??"")
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
 }
 
 /* =========================================================
    TOKEN RENDER
 ========================================================= */
 
-function renderToken(
-  data,
-  holdersData,
-  save=true
-){
-
+function renderToken(data,holdersData,save=true){
   currentData=data;
 
-  const m=
-    data.metadata||{};
+  const m=data?.metadata || {};
+  const intel=getIntelligence(data);
 
   const name=
     m.name ||
+    data?.name ||
     "Unknown Token";
 
   const sym=
     m.symbol ||
+    data?.symbol ||
     "UNKNOWN";
 
   const dec=
-    m.decimals ?? 0;
+    m.decimals ??
+    data?.decimals ??
+    0;
 
   const ver=
-    data.verification ||
+    data?.verification ||
+    data?.verification_status ||
     "unknown";
 
   $("tokenName").textContent=name;
-
   $("tokenSymbol").textContent=sym;
 
   /* TOKEN IMAGE */
-
   const img=
-    data.preview ||
+    data?.preview ||
+    data?.image ||
     m.image ||
     "";
 
-  const ie=
-    $("tokenImage");
-
-  const fb=
-    $("tokenFallback");
+  const ie=$("tokenImage");
+  const fb=$("tokenFallback");
 
   if(img){
-
     ie.src=img;
-
     ie.style.display="block";
-
     fb.style.display="none";
-
     ie.onerror=()=>{
-
       ie.style.display="none";
-
       fb.style.display="flex";
-
-      fb.textContent=
-        sym.charAt(0).toUpperCase();
-
+      fb.textContent=sym.charAt(0).toUpperCase();
     };
-
   }else{
-
     ie.style.display="none";
-
     fb.style.display="flex";
-
-    fb.textContent=
-      sym.charAt(0).toUpperCase();
-
+    fb.textContent=sym.charAt(0).toUpperCase();
   }
 
   /* VERIFICATION */
-
-  $("verification").textContent=
-    verificationText(ver);
-
-  $("verification").className=
-    "verify "+
-    verificationClass(ver);
+  $("verification").textContent=verificationText(ver);
+  $("verification").className="verify "+verificationClass(ver);
 
   /* DESCRIPTION */
-
   fullDescription=
     m.description ||
+    data?.description ||
     t("noDescription");
 
   updateDescription();
 
   /* BASIC DATA */
-
-  $("holders").textContent=
-    formatNumber(
-      data.holders_count
+  const holderCount=
+    Number(
+      data?.holders_count ??
+      data?.holdersCount ??
+      data?.holders?.count ??
+      0
     );
+
+  $("holders").textContent=formatNumber(holderCount);
 
   $("supply").textContent=
     formatSupply(
-      data.total_supply,
+      data?.total_supply ?? data?.totalSupply,
       dec
     );
 
-  $("decimals").textContent=
-    dec;
+  $("decimals").textContent=dec;
+
+  const mintable=
+    data?.mintable===true ||
+    data?.mintable===1 ||
+    data?.mintable==="true";
 
   $("mintable").textContent=
-    data.mintable
-    ? t("yes")
-    : t("no");
+    mintable ? t("yes") : t("no");
+
+  const adminPresent=!!(
+    data?.admin?.address ||
+    data?.admin
+  );
 
   $("adminStat").textContent=
-    (
-      data.admin?.address ||
-      data.admin
-    )
-    ? t("yes")
-    : t("no");
+    adminPresent ? t("yes") : t("no");
 
-  $("addressDisplay").textContent=
-    currentAddress;
+  $("addressDisplay").textContent=currentAddress;
+  $("lastUpdated").textContent=t("updated");
 
-  $("lastUpdated").textContent=
-    t("updated");
-
-  /* HOLDER CONCENTRATION */
-
-  let conc=0;
-
-  let top=[];
-
-  if(
-    holdersData?.addresses?.length &&
-    data.total_supply
-  ){
-
-    try{
-
-      const total=
-        BigInt(
-          data.total_supply
-        );
-
-      let sum=0n;
-
-      top=
-        holdersData.addresses
-          .slice(0,10);
-
-      top.forEach(x=>{
-
-        try{
-
-          sum+=
-            BigInt(
-              x.balance||0
-            );
-
-        }catch{}
-
-      });
-
-      if(total>0n){
-
-        conc=
-          Number(
-            (sum*10000n)/total
-          )/100;
-
-      }
-
-    }catch(e){
-
-      console.debug(
-        "Concentration error:",
-        e
-      );
-
-    }
-
-  }
-
-  currentConcentration=conc;
+  /* GUARDIAN CONCENTRATION */
+  const conc=concentrationFromGuardian(intel);
+  currentConcentration=conc ?? 0;
 
   $("concentration").textContent=
-    conc
-    ? conc.toFixed(1)+"%"
-    : "—";
+    conc==null
+      ? "—"
+      : conc.toFixed(1)+"%";
 
-  /* RISK */
-
-  const r=
-    calculateRisk(
-      data,
-      conc
-    );
-
-  currentScore=
-    r.score;
+  /* GUARDIAN SCORE — NO FRONTEND SCORE CALCULATION */
+  currentScore=intel.score ?? 0;
 
   $("scoreValue").textContent=
-    r.score+"/100";
+    intel.score==null
+      ? "—"
+      : intel.score+"/100";
 
   $("scoreFill").style.width=
-    r.score+"%";
+    intel.score==null ? "0%" : intel.score+"%";
 
   $("scoreFill").style.background=
-    scoreColor(r.score);
+    intel.score==null
+      ? "var(--border)"
+      : scoreColor(intel.score);
 
   $("scoreValue").style.color=
-    scoreColor(r.score);
+    intel.score==null
+      ? "var(--muted)"
+      : scoreColor(intel.score);
 
   $("scoreLabel").textContent=
-    scoreLabel(r.score);
+    guardianRiskLabel(intel);
 
+  /* GUARDIAN REASONS */
   $("breakdown").innerHTML=
-    r.bd
-      .map(x=>`
+    reasonRowsHTML(intel.reasons);
 
-        <div class="bd-row">
+  /* GUARDIAN ASSESSMENT */
+  const riskText=
+    intel.risk
+      ? `Risk level: ${intel.risk}.`
+      : t("guardianAnalyzing");
 
-          <span>
-            ${x[0]}
-          </span>
+  const scoreText=
+    intel.score==null
+      ? ""
+      : ` ${name} — ${intel.score}/100.`;
 
-          <span>
-            ${x[1]===0
-              ? "—"
-              : x[1]}
-          </span>
-
-        </div>
-
-      `)
-      .join("");
-
-  /* AI */
+  const concText=
+    conc==null
+      ? ""
+      : lang==="tr"
+        ? ` İlk 10 holder yaklaşık %${conc.toFixed(1)} arzı kontrol ediyor.`
+        : ` Top 10 holders control approximately ${conc.toFixed(1)}% of supply.`;
 
   $("aiText").textContent=
-    generateAssessment(
-      data,
-      conc,
-      r.score
-    );
+    riskText+scoreText+concText;
 
   /* SECURITY */
-
   const verified=
-    ver==="whitelist" ||
-    ver==="verified";
+    String(ver).toLowerCase()==="whitelist" ||
+    String(ver).toLowerCase()==="verified";
 
   setCheck(
     "verifyIcon",
@@ -3171,8 +2924,8 @@ function renderToken(
     verified
       ? t("verifiedStatus")
       : (
-        ver==="blacklist" ||
-        ver==="scam"
+        String(ver).toLowerCase()==="blacklist" ||
+        String(ver).toLowerCase()==="scam"
       )
       ? t("blacklisted")
       : t("unverifiedStatus")
@@ -3181,16 +2934,11 @@ function renderToken(
   setCheck(
     "mintIcon",
     "mintStatus",
-    data.mintable!==true,
-    data.mintable
+    !mintable,
+    mintable
       ? t("mintOn")
       : t("mintOff")
   );
-
-  const holderCount=
-    Number(
-      data.holders_count||0
-    );
 
   setCheck(
     "holderIcon",
@@ -3201,17 +2949,11 @@ function renderToken(
       : t("holderLow")
   );
 
-  const hasAdmin=
-    !!(
-      data.admin?.address ||
-      data.admin
-    );
-
   setCheck(
     "adminIcon",
     "adminStatus",
-    !hasAdmin,
-    hasAdmin
+    !adminPresent,
+    adminPresent
       ? t("adminDetected")
       : t("adminNone")
   );
@@ -3219,212 +2961,144 @@ function renderToken(
   setCheck(
     "concIcon",
     "concStatus",
-    conc<50,
-    conc>=70
+    conc!=null && conc<50,
+    conc==null
+      ? t("concUnavailable")
+      : conc>=70
       ? t("concExtreme")
       : conc>=50
       ? t("concHigh")
-      : conc
-      ? t("concOk")
-      : t("concUnavailable")
+      : t("concOk")
   );
 
-  /* HOLDER CARD */
+  /* HOLDER CARD — uses Guardian response only */
+  const top=holdersData?.addresses?.length
+    ? holdersData.addresses.slice(0,10)
+    : holdersFromGuardian(data).slice(0,10);
 
   if(top.length){
+    $("holdersSection").style.display="block";
 
-    $("holdersSection")
-      .style.display="block";
+    const displayConc=conc ?? 0;
 
     $("concFill").style.width=
-      Math.min(
-        100,
-        conc
-      )+"%";
+      Math.min(100,Math.max(0,displayConc))+"%";
 
     $("concFill").style.background=
-      conc>=60
-      ? "var(--red)"
-      : conc>=40
-      ? "var(--yellow)"
-      : "var(--green)";
+      displayConc>=60
+        ? "var(--red)"
+        : displayConc>=40
+        ? "var(--yellow)"
+        : "var(--green)";
 
     $("concLabel").textContent=
-      lang==="tr"
-      ? `İlk 10 holder arzın ${conc.toFixed(1)}%'ini kontrol ediyor.`
-      : `Top 10 holders control ${conc.toFixed(1)}% of supply.`;
+      conc==null
+        ? t("concUnavailable")
+        : lang==="tr"
+        ? `İlk 10 holder arzın %${conc.toFixed(1)}'ini kontrol ediyor.`
+        : `Top 10 holders control ${conc.toFixed(1)}% of supply.`;
 
-    $("holdersList").innerHTML=
-      top
-        .map((h,i)=>{
+    $("holdersList").innerHTML=top.map((h,i)=>{
+      const balance=
+        h?.balance ??
+        h?.amount ??
+        h?.value ??
+        0;
 
-          let pct="—";
+      let pct="—";
 
-          try{
+      if(conc!=null && i===0 && top.length===1){
+        pct=conc.toFixed(2)+"%";
+      }else{
+        try{
+          const b=BigInt(balance||0);
+          const total=BigInt(
+            data?.total_supply ??
+            data?.totalSupply ??
+            0
+          );
 
-            const b=
-              BigInt(
-                h.balance||0
-              );
+          if(total>0n){
+            pct=(Number((b*10000n)/total)/100).toFixed(2)+"%";
+          }
+        }catch{}
+      }
 
-            const tot=
-              BigInt(
-                data.total_supply||0
-              );
-
-            if(tot>0n){
-
-              pct=
-                (
-                  Number(
-                    (b*10000n)/tot
-                  )/100
-                ).toFixed(2)+"%";
-
-            }
-
-          }catch{}
-
-          return`
-
-            <div class="holder-row">
-
-              <span class="holder-addr">
-                #${i+1}
-                ${shortAddress(
-                  h.owner?.address ||
-                  h.address
-                )}
-              </span>
-
-              <span class="holder-pct">
-                ${pct}
-              </span>
-
-            </div>
-
-          `;
-
-        })
-        .join("");
-
+      return `
+        <div class="holder-row">
+          <span class="holder-addr">
+            #${i+1}
+            ${escapeHTML(shortAddress(
+              h?.owner?.address ||
+              h?.address ||
+              h?.owner ||
+              "—"
+            ))}
+          </span>
+          <span class="holder-pct">${pct}</span>
+        </div>
+      `;
+    }).join("");
   }else{
-
-    $("holdersSection")
-      .style.display="block";
-
-    $("concFill").style.width="0%";
-
+    $("holdersSection").style.display="block";
+    $("concFill").style.width=
+      conc==null ? "0%" : Math.min(100,conc)+"%";
     $("concFill").style.background=
-      "var(--border)";
-
+      conc==null ? "var(--border)" : scoreColor(100-conc);
     $("concLabel").textContent=
-      t("holderLoading");
-
+      conc==null
+        ? t("holderDataUnavailable")
+        : lang==="tr"
+        ? `İlk 10 holder arzın %${conc.toFixed(1)}'ini kontrol ediyor.`
+        : `Top 10 holders control ${conc.toFixed(1)}% of supply.`;
     $("holdersList").innerHTML=
-      `<div style="
-        color:var(--muted);
-        font-size:10px;
-        padding:6px 0;
-      ">
-        ${t("holderDataUnavailable")}
-      </div>`;
-
+      `<div style="color:var(--muted);font-size:10px;padding:6px 0;">${t("holderDataUnavailable")}</div>`;
   }
 
   /* SOCIALS */
-
   const socials=[];
 
-  if(
-    Array.isArray(m.websites)
-  ){
-
-    m.websites
-      .slice(0,2)
-      .forEach(u=>{
-
-        socials.push({
-          label:"Website",
-          url:u
-        });
-
-      });
-
+  if(Array.isArray(m.websites)){
+    m.websites.slice(0,2).forEach(u=>{
+      socials.push({label:"Website",url:u});
+    });
   }
 
-  [
-    "twitter",
-    "telegram",
-    "github",
-    "discord"
-  ].forEach(k=>{
-
+  ["twitter","telegram","github","discord"].forEach(k=>{
     if(m[k]){
-
       socials.push({
-
-        label:
-          k.charAt(0)
-            .toUpperCase()+
-          k.slice(1),
-
+        label:k.charAt(0).toUpperCase()+k.slice(1),
         url:m[k]
-
       });
-
     }
-
   });
 
   $("socials").style.display=
-    socials.length
-    ? "flex"
-    : "none";
+    socials.length ? "flex" : "none";
 
   $("socials").innerHTML=
-    socials
-      .slice(0,4)
-      .map(s=>`
-
-        <a
-          class="social-btn"
-          href="${s.url}"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          ${s.label}
-        </a>
-
-      `)
-      .join("");
+    socials.slice(0,4).map(s=>`
+      <a
+        class="social-btn"
+        href="${escapeHTML(s.url)}"
+        target="_blank"
+        rel="noopener noreferrer"
+      >${escapeHTML(s.label)}</a>
+    `).join("");
 
   updateFavButton();
-
-  $("result").style.display=
-    "block";
+  $("result").style.display="block";
 
   if(save){
-
     saveToHistory({
-
-      address:
-        currentAddress,
-
+      address:currentAddress,
       name,
-
       symbol:sym,
-
       image:img,
-
-      score:r.score,
-
+      score:intel.score,
       ts:Date.now()
-
     });
-
   }
-
 }
 
 /* =========================================================
@@ -3483,19 +3157,14 @@ async function scanToken(refresh=false){
 
   const input=
     refresh
-    ? currentAddress
-    : $("addressInput")
-        .value
-        .trim();
+      ? currentAddress
+      : $("addressInput")
+          .value
+          .trim();
 
   if(!input){
-
-    showError(
-      t("invalid")
-    );
-
+    showError(t("invalid"));
     return;
-
   }
 
   const valid=
@@ -3503,183 +3172,79 @@ async function scanToken(refresh=false){
     /^-?\d+:[a-fA-F0-9]{64}$/.test(input);
 
   if(!valid){
-
-    $("addressInput")
-      .classList
-      .add("invalid");
-
-    showError(
-      t("invalid")
-    );
-
+    $("addressInput").classList.add("invalid");
+    showError(t("invalid"));
     return;
-
   }
 
-  $("addressInput")
-    .classList
-    .remove("invalid");
-
-  currentAddress=
-    input;
-
-  $("addressInput")
-    .value=
-    input;
-
-  $("result")
-    .style.display=
-    "none";
-
+  $("addressInput").classList.remove("invalid");
+  currentAddress=input;
+  $("addressInput").value=input;
+  $("result").style.display="none";
   currentHoldersData=null;
 
   showLoading(true);
-
   haptic("light");
 
   try{
-
     /*
-      IMPORTANT:
-      We no longer call TONAPI directly.
+      SINGLE SOURCE OF TRUTH:
 
-      Request:
       Noventra Scan
           ↓
-      Cloudflare Worker
+      Noventra Scan API
           ↓
-      TONAPI
+      Noventra Guardian
+          ↓
+      TONAPI / market intelligence
+
+      The frontend does NOT calculate risk.
+      The frontend does NOT request holders separately.
     */
 
-    const r=
-  await fetch(
-    `${API_BASE}/jetton/${encodeURIComponent(input)}`,
-     {
-          method:"GET",
-          headers:{
-            "Accept":
-              "application/json"
-          },
-          cache:"no-store"
-        }
-      );
+    const r=await fetch(
+      `${API_BASE}/jetton/${encodeURIComponent(input)}`,
+      {
+        method:"GET",
+        headers:{"Accept":"application/json"},
+        cache:"no-store"
+      }
+    );
 
     if(!r.ok){
+      if(r.status===404)
+        throw Error(t("notFound"));
 
-      if(r.status===404){
+      if(r.status===429)
+        throw Error(t("rateLimit"));
 
-        throw Error(
-          t("notFound")
-        );
-
-      }
-
-      if(r.status===429){
-
-        throw Error(
-          t("rateLimit")
-        );
-
-      }
-
-      throw Error(
-        `${t("requestFailed")} (${r.status})`
-      );
-
+      throw Error(`${t("requestFailed")} (${r.status})`);
     }
 
-    const data=
-      await r.json();
+    const data=await r.json();
 
-    /*
-      Render core token data immediately.
-    */
+    if(!data || typeof data!=="object")
+      throw Error(t("requestFailed"));
 
+    currentData=data;
     currentHoldersData=null;
 
-    renderToken(
-      data,
-      null,
-      true
-    );
-
+    renderToken(data,null,true);
     haptic("medium");
 
-    /*
-      Holder data is requested separately.
-
-      If the Worker supports:
-      /ADDRESS/holders
-
-      it will populate Top 10 data.
-
-      If not, the main scan still works.
-    */
-
-    setTimeout(
-      async()=>{
-
-        try{
-
-         const hr=
-  await fetch(
-    `${API_BASE}/jetton/${encodeURIComponent(input)}/holders?limit=12&offset=0`,
-              {
-                method:"GET",
-                headers:{
-                  "Accept":
-                    "application/json"
-                },
-                cache:"no-store"
-              }
-            );
-
-          if(hr.ok){
-
-            currentHoldersData=
-              await hr.json();
-
-            renderToken(
-              currentData,
-              currentHoldersData,
-              false
-            );
-
-          }
-
-        }catch(e){
-
-          console.debug(
-            "Holder endpoint unavailable:",
-            e
-          );
-
-        }
-
-      },
-      2500
-    );
-
   }catch(e){
-
-    console.error(
-      "Noventra Scan Error:",
-      e
-    );
+    console.error("Noventra Scan Error:",e);
 
     showError(
-      e.message ||
+      e?.message ||
       t("requestFailed")
     );
 
     haptic("heavy");
 
   }finally{
-
     showLoading(false);
-
   }
-
 }
 
 /* =========================================================
