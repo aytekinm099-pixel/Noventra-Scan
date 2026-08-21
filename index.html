@@ -2753,25 +2753,32 @@ function escapeHTML(v){
 function renderToken(data,holdersData,save=true){
   currentData=data;
 
-  const m=data?.metadata || {};
+  /* Guardian/Scan API v3 nests Jetton data under `jetton`. */
+  const j=data?.jetton || data || {};
+  const m=j?.metadata || data?.metadata || {};
   const intel=getIntelligence(data);
 
   const name=
     m.name ||
+    j?.name ||
     data?.name ||
     "Unknown Token";
 
   const sym=
     m.symbol ||
+    j?.symbol ||
     data?.symbol ||
     "UNKNOWN";
 
   const dec=
     m.decimals ??
+    j?.decimals ??
     data?.decimals ??
     0;
 
   const ver=
+    j?.verification ||
+    j?.verification_status ||
     data?.verification ||
     data?.verification_status ||
     "unknown";
@@ -2781,6 +2788,8 @@ function renderToken(data,holdersData,save=true){
 
   /* TOKEN IMAGE */
   const img=
+    j?.preview ||
+    j?.image ||
     data?.preview ||
     data?.image ||
     m.image ||
@@ -2811,6 +2820,7 @@ function renderToken(data,holdersData,save=true){
   /* DESCRIPTION */
   fullDescription=
     m.description ||
+    j?.description ||
     data?.description ||
     t("noDescription");
 
@@ -2819,23 +2829,31 @@ function renderToken(data,holdersData,save=true){
   /* BASIC DATA */
   const holderCount=
     Number(
+      j?.holders_count ??
+      j?.holdersCount ??
       data?.holders_count ??
       data?.holdersCount ??
       data?.holders?.count ??
-      0
+      (Array.isArray(data?.holders) ? data.holders.length : 0)
     );
 
   $("holders").textContent=formatNumber(holderCount);
 
   $("supply").textContent=
     formatSupply(
-      data?.total_supply ?? data?.totalSupply,
+      j?.total_supply ??
+      j?.totalSupply ??
+      data?.total_supply ??
+      data?.totalSupply,
       dec
     );
 
   $("decimals").textContent=dec;
 
   const mintable=
+    j?.mintable===true ||
+    j?.mintable===1 ||
+    j?.mintable==="true" ||
     data?.mintable===true ||
     data?.mintable===1 ||
     data?.mintable==="true";
@@ -2844,6 +2862,8 @@ function renderToken(data,holdersData,save=true){
     mintable ? t("yes") : t("no");
 
   const adminPresent=!!(
+    j?.admin?.address ||
+    j?.admin ||
     data?.admin?.address ||
     data?.admin
   );
@@ -2972,8 +2992,12 @@ function renderToken(data,holdersData,save=true){
   );
 
   /* HOLDER CARD — uses Guardian response only */
-  const top=holdersData?.addresses?.length
-    ? holdersData.addresses.slice(0,10)
+  const directHolders=Array.isArray(holdersData)
+    ? holdersData
+    : holdersData?.addresses;
+
+  const top=directHolders?.length
+    ? directHolders.slice(0,10)
     : holdersFromGuardian(data).slice(0,10);
 
   if(top.length){
@@ -3013,6 +3037,8 @@ function renderToken(data,holdersData,save=true){
         try{
           const b=BigInt(balance||0);
           const total=BigInt(
+            j?.total_supply ??
+            j?.totalSupply ??
             data?.total_supply ??
             data?.totalSupply ??
             0
